@@ -121,6 +121,19 @@ termine** (iz radnog vremena minus zauzeće) → ostavi ime + telefon → zahtev
 - Podsetnici MVP **bez troška**: dugme na terminu otvara gotov `sms:`/WhatsApp/Viber link sa
   unapred sastavljenom porukom. Automatski SMS (plaćeni provajder) tek kasnije.
 
+## Faza 8 — Diferencijatori ("samo mi to imamo")
+
+Detaljna analiza konkurencije i obrazloženje: `docs/KONKURENCIJA.md`. Ukratko, redom:
+
+1. **K1** Viber/WhatsApp/SMS podsetnici za 0 RSD (konkurencija naplaćuje 5,95 RSD/SMS) — Free.
+2. **K2** Kapara preko **NBS IPS QR** koda — pare direktno na račun salona, bez gateway-a;
+   ubija no-show. Niko lokalno ovo nema.
+3. **K3** Karton klijenta: formula boje, alergije, omiljeni radnik — frizerski lock-in.
+4. **K5** Pametan „vreme je za termin" — klijenti koji su probili svoj prosečan ritam dolazaka
+   + jedan tap do Viber poruke.
+5. **K4** Lista čekanja — otkazan termin se nudi klijentima koji čekaju taj dan.
+6. **K6** Ocena pouzdanosti klijenta → automatski predlog kapare (K2+K6 kombinacija je unikat).
+
 ## Infrastruktura (paralelno, pred launch)
 
 Deploy na Hetzner (Docker Compose: app + Postgres + Caddy sa auto-TLS), noćni `pg_dump` backup,
@@ -134,9 +147,11 @@ health-check.
 2. ✅ Faza 2 — Auth + registracija + onboarding
 3. ✅ Faza 4 — Početna strana
 4. ✅ Faza 3 — CRUD ekrani (+ prvi deo statistike iz Faze 7)
-5. Faza 5 — Premium gating
-6. Faza 6 — Online zakazivanje
-7. Faza 7 — Statistika + podsetnici
+5. Faza 6 — Online zakazivanje (razlog da se plati Pro — ide pre gating-a)
+6. K1 podsetnici (Viber/WhatsApp/sms linkovi, Free)
+7. Faza 5 — Premium gating (`salons.plan`)
+8. Faza 8 — diferencijatori redom: K2 kapara → K3 karton → K5 ritam → K4 lista čekanja → K6
+9. Nedeljni pregled + izvoz u Excel (usput)
 
 Cilj ovog redosleda: najranije dobiti nešto što se može pokazati salonima i pustiti prve
 korisnike (registracija + osnovni kalendar + CRUD), pa tek onda premium slojeve.
