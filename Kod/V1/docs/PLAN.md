@@ -134,6 +134,20 @@ Detaljna analiza konkurencije i obrazloženje: `docs/KONKURENCIJA.md`. Ukratko, 
 5. **K4** Lista čekanja — otkazan termin se nudi klijentima koji čekaju taj dan.
 6. **K6** Ocena pouzdanosti klijenta → automatski predlog kapare (K2+K6 kombinacija je unikat).
 
+## Faza 9 — Mini sajt salona (K7: "sajt koji se sam ažurira")
+
+Javna strana `tefter.rs/s/:slug` kao mali sajt salona: hero (ime + fotka), o nama, **cenovnik
+automatski iz usluga**, galerija (do 6 slika, WebP preko sharp-a), **radno vreme automatski iz
+podešavanja**, kontakt + Instagram, dugme „Zakaži" → Faza 6.
+
+- **Pattern, ne custom**: jedan `site.njk` + CSS varijable. Salon bira temu (3–4 varijante),
+  boju iz palete (isti UI kao boja radnika) i slike — editor je jedan ekran u Podešavanjima.
+- **Cene**: osnovna tema u Free (sa Tefter potpisom — akvizicioni mamac); sve teme + galerija
+  bez potpisa u Pro; svoj domen +2.990 RSD/god (Caddy on-demand TLS, domen kupuje salon).
+- **Trošak za nas**: ~0 (isti VPS; ~1,2 MB slika po salonu).
+- Prodajni ugao: sajt kod studija = 30–60k RSD + naplata izmena; kod nas uključeno i nikad
+  zastareo — promena cene usluge menja i sajt.
+
 ## Infrastruktura (paralelno, pred launch)
 
 Deploy na Hetzner (Docker Compose: app + Postgres + Caddy sa auto-TLS), noćni `pg_dump` backup,
