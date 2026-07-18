@@ -136,6 +136,9 @@ Detaljna analiza konkurencije i obrazloženje: `docs/KONKURENCIJA.md`. Ukratko, 
 
 ## Faza 9 — Mini sajt salona (K7: "sajt koji se sam ažurira")
 
+**Detaljan master plan: `docs/SAJT.md`** (model podataka, teme, editor, slike, SEO, gating,
+svoj domen, redosled 9.1–9.5 sa procenama).
+
 Javna strana `tefter.rs/s/:slug` kao mali sajt salona: hero (ime + fotka), o nama, **cenovnik
 automatski iz usluga**, galerija (do 6 slika, WebP preko sharp-a), **radno vreme automatski iz
 podešavanja**, kontakt + Instagram, dugme „Zakaži" → Faza 6.
