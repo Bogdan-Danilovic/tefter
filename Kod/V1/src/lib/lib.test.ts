@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { packColumns } from "./layout.js";
 import { formatRsd, parseRsdToMinor } from "./money.js";
+import { slugCandidate, slugify } from "./slug.js";
+import { openSession, parseCookieHeader, sealSession, type SessionPayload } from "./session.js";
 import {
   addDays,
   hmToMinutes,
@@ -76,5 +78,57 @@ describe("time", () => {
     const inst = wallToInstant(2026, 1, 15, 8, 0, tz);
     expect(minutesInTz(inst, tz)).toBe(8 * 60);
     expect(isoDateInTz(tz, inst)).toBe("2026-01-15");
+  });
+});
+
+describe("slug", () => {
+  it("transliteruje srpsku latinicu", () => {
+    expect(slugify("Studio Šarm & Sjaj")).toBe("studio-sarm-sjaj");
+    expect(slugify("Frizerski salon Đurđevak")).toBe("frizerski-salon-djurdjevak");
+    expect(slugify("Čupavko ćošak žžž")).toBe("cupavko-cosak-zzz");
+  });
+  it("čisti višak znakova i ivične crtice", () => {
+    expect(slugify("  --Mari's   Salon!--  ")).toBe("mari-s-salon");
+    expect(slugify("###")).toBe("salon");
+  });
+  it("slugCandidate numeriše od drugog pokušaja", () => {
+    expect(slugCandidate("mari", 0)).toBe("mari");
+    expect(slugCandidate("mari", 1)).toBe("mari-2");
+    expect(slugCandidate("mari", 2)).toBe("mari-3");
+  });
+});
+
+describe("session", () => {
+  const secret = "test-secret";
+  const payload: SessionPayload = {
+    accountId: "a1",
+    salonId: "s1",
+    slug: "demo",
+    exp: Date.now() + 60_000,
+  };
+
+  it("seal/open round-trip", () => {
+    const token = sealSession(payload, secret);
+    expect(openSession(token, secret)).toEqual(payload);
+  });
+  it("odbija pogrešan potpis i izmenjen payload", () => {
+    const token = sealSession(payload, secret);
+    expect(openSession(token, "drugi-secret")).toBeNull();
+    const [body] = token.split(".");
+    const forged = `${Buffer.from(JSON.stringify({ ...payload, salonId: "tudji" })).toString("base64url")}.${token.split(".")[1]}`;
+    expect(openSession(forged, secret)).toBeNull();
+    expect(openSession(`${body}.AAAA`, secret)).toBeNull();
+  });
+  it("odbija istekao token (exp u payload-u, ne samo Max-Age)", () => {
+    const token = sealSession({ ...payload, exp: 1000 }, secret);
+    expect(openSession(token, secret, 2000)).toBeNull();
+  });
+  it("parseCookieHeader izvlači cookie", () => {
+    expect(parseCookieHeader("a=1; tefter_sess=xyz.abc; b=2")).toEqual({
+      a: "1",
+      tefter_sess: "xyz.abc",
+      b: "2",
+    });
+    expect(parseCookieHeader(undefined)).toEqual({});
   });
 });

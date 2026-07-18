@@ -8,9 +8,12 @@ import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
 import nunjucks from "nunjucks";
 import { resolveSalonHook } from "./web/tenant.js";
+import { requireAuthHook, sessionHook } from "./web/auth.js";
 import { dayRoutes } from "./web/routes/day.js";
 import { appointmentRoutes } from "./web/routes/appointments.js";
 import { clientRoutes } from "./web/routes/clients.js";
+import { authRoutes, publicAuthRoutes } from "./web/routes/auth.js";
+import { onboardingRoutes } from "./web/routes/onboarding.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const viewsDir = join(here, "web/views");
@@ -48,18 +51,38 @@ async function build() {
   });
   await app.register(fastifyStatic, { root: publicDir, prefix: "/" });
 
-  // Sve tenant rute pod /s/:slug; preHandler razrešava salon.
+  // Sesija se čita za svaki request (potpisani cookie).
+  app.addHook("onRequest", sessionHook);
+
+  // Javne rute: globalna prijava + registracija salona.
+  await app.register(publicAuthRoutes);
+
+  // Tenant JAVNO pod /s/:slug — prijava/odjava konkretnog salona.
   await app.register(
     async (scope) => {
       scope.addHook("preHandler", resolveSalonHook);
-      await scope.register(dayRoutes);
-      await scope.register(appointmentRoutes);
-      await scope.register(clientRoutes);
+      await scope.register(authRoutes);
     },
     { prefix: "/s/:slug" },
   );
 
-  app.get("/", (_req, reply) => reply.redirect("/s/demo/day"));
+  // Tenant ZAŠTIĆENO pod /s/:slug — sve ostalo traži sesiju tog salona.
+  await app.register(
+    async (scope) => {
+      scope.addHook("preHandler", resolveSalonHook);
+      scope.addHook("preHandler", requireAuthHook);
+      await scope.register(dayRoutes);
+      await scope.register(appointmentRoutes);
+      await scope.register(clientRoutes);
+      await scope.register(onboardingRoutes);
+    },
+    { prefix: "/s/:slug" },
+  );
+
+  // Ulogovan → svoj kalendar; ostali → prijava. (Faza 4 ovde donosi landing.)
+  app.get("/", (req, reply) =>
+    reply.redirect(req.session ? `/s/${req.session.slug}/day` : "/prijava"),
+  );
 
   return app;
 }

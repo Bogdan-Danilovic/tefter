@@ -1,0 +1,39 @@
+{% extends "layout.njk" %}
+{% block title %}Radno vreme · Tefter{% endblock %}
+{% block content %}
+<div class="mx-auto w-full max-w-sm px-5 pb-16 pt-10">
+  {% set step = 1 %}
+  {% set heading = "Radno vreme" %}
+  {% set sub = "Kada salon radi? Ovo određuje raster kalendara." %}
+  {% include "partials/onboarding-head.njk" %}
+
+  <form method="post" action="/s/{{ s.slug }}/podesi/radno-vreme" class="flex flex-col gap-2.5">
+    {% for r in rows %}
+    <div class="rounded-xl border border-line bg-surface px-3.5 py-3"
+         x-data="{ closed: {{ 'true' if r.closed else 'false' }} }">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm font-medium">{{ r.name }}</p>
+          <label class="mt-0.5 flex items-center gap-1.5 text-xs text-muted">
+            <input type="checkbox" name="closed_{{ r.weekday }}" x-model="closed"
+                   {% if r.closed %}checked{% endif %}
+                   class="h-4 w-4 rounded border-line accent-ink" />
+            Ne radi
+          </label>
+        </div>
+        <div class="flex items-center gap-1.5" x-show="!closed">
+          <input class="field w-[6.2rem] px-2 text-center tabular-nums" type="time" step="900"
+                 name="open_{{ r.weekday }}" value="{{ r.open }}" />
+          <span class="text-muted">–</span>
+          <input class="field w-[6.2rem] px-2 text-center tabular-nums" type="time" step="900"
+                 name="close_{{ r.weekday }}" value="{{ r.close }}" />
+        </div>
+      </div>
+      {% if r.error %}<p class="field-error">{{ r.error }}</p>{% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary mt-4 h-12 w-full text-[15px]">Nastavi</button>
+  </form>
+</div>
+{% endblock %}

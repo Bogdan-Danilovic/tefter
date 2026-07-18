@@ -1,0 +1,38 @@
+{% extends "layout.njk" %}
+{% block title %}Prijava · Tefter{% endblock %}
+{% block content %}
+<div class="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
+  <div class="mb-8 text-center">
+    <p class="text-[26px] font-semibold tracking-tight">Tefter<span class="text-now">.</span></p>
+    {% if salonName %}
+    <p class="mt-1 text-sm text-muted">Prijava u <span class="font-medium text-ink">{{ salonName }}</span></p>
+    {% else %}
+    <p class="mt-1 text-sm text-muted">Rokovnik tvog salona, u telefonu.</p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ actionUrl }}" class="flex flex-col gap-4">
+    <div>
+      <label class="field-label" for="email">Email</label>
+      <input class="field" type="email" id="email" name="email" value="{{ email }}"
+             autocomplete="email" inputmode="email" required autofocus />
+    </div>
+    <div>
+      <label class="field-label" for="password">Lozinka</label>
+      <input class="field" type="password" id="password" name="password"
+             autocomplete="current-password" required />
+    </div>
+
+    {% if error %}
+    <p class="rounded-lg bg-now/10 px-3 py-2.5 text-sm text-now">{{ error }}</p>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary h-12 w-full text-[15px]">Prijavi se</button>
+  </form>
+
+  <p class="mt-6 text-center text-sm text-muted">
+    Nemaš nalog?
+    <a href="/registracija" class="font-medium text-ink underline underline-offset-2">Registruj svoj salon</a>
+  </p>
+</div>
+{% endblock %}

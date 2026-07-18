@@ -1,7 +1,7 @@
 import { and, eq, or, ilike, ne, sql, asc } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "./schema.js";
-import { appointments, clients, services, staff, workingHours } from "./schema.js";
+import { appointments, clients, salonAccounts, services, staff, workingHours } from "./schema.js";
 
 export type Tx = PostgresJsDatabase<typeof schema>;
 
@@ -205,4 +205,63 @@ export async function cancelAppointment(tx: Tx, salonId: string, id: string) {
     .where(and(eq(appointments.salonId, salonId), eq(appointments.id, id)))
     .returning();
   return row ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Auth + onboarding (Faza 2)
+// ---------------------------------------------------------------------------
+
+/** Nalog salona po email-u — prijava na /s/:slug/prijava (tenant poznat, RLS važi). */
+export async function accountForSalon(tx: Tx, salonId: string, email: string) {
+  const rows = await tx
+    .select()
+    .from(salonAccounts)
+    .where(
+      and(
+        eq(salonAccounts.salonId, salonId),
+        sql`lower(${salonAccounts.email}) = lower(${email})`,
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export type WorkingHourInput = {
+  weekday: number;
+  isClosed: boolean;
+  openTime: string | null;
+  closeTime: string | null;
+};
+
+/** Wizard korak 1: zameni svih 7 dana odjednom (delete + insert u istoj transakciji). */
+export async function replaceWorkingHours(tx: Tx, salonId: string, rows: WorkingHourInput[]) {
+  await tx.delete(workingHours).where(eq(workingHours.salonId, salonId));
+  await tx.insert(workingHours).values(rows.map((r) => ({ ...r, salonId })));
+}
+
+/** Wizard korak 2: dodaj usluge (cena u minor jedinicama). */
+export async function insertServices(
+  tx: Tx,
+  salonId: string,
+  items: { name: string; durationMin: number; priceMinor: number }[],
+) {
+  if (items.length === 0) return;
+  await tx.insert(services).values(
+    items.map((s) => ({
+      salonId,
+      name: s.name,
+      defaultDurationMin: s.durationMin,
+      defaultPrice: s.priceMinor,
+    })),
+  );
+}
+
+/** Wizard korak 3: dodaj radnike (boja iz palete). */
+export async function insertStaffMembers(
+  tx: Tx,
+  salonId: string,
+  items: { fullName: string; color: string }[],
+) {
+  if (items.length === 0) return;
+  await tx.insert(staff).values(items.map((s) => ({ salonId, ...s })));
 }

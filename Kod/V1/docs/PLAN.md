@@ -1,6 +1,7 @@
 # Tefter — plan pune aplikacije
 
-> Status: Faza 1 (Mobile + PWA) implementirana i verifikovana uživo (2026-07-18).
+> Status: Faza 1 (Mobile + PWA) i Faza 2 (Auth + registracija + onboarding) implementirane i
+> verifikovane (2026-07-18).
 > Arhitektura je fiksna: Fastify + TypeScript, Nunjucks (server-side render), HTMX + Alpine.js
 > (NO React, NO JS build step), Tailwind CLI, PostgreSQL, Drizzle ORM, Zod, Vitest,
 > Docker Compose (app + Postgres + Caddy) na Hetzner VPS. Multi-tenant preko `salon_id` +
@@ -47,13 +48,20 @@ primarnom uređaju, i aplikacija se može instalirati kao PWA.
 Verifikovano uživo: RLS izolacija, soft-check preklapanja, mobilni layout (bottom nav/FAB/sheet
 merenjem geometrije), swipe navigacija, service worker + manifest.
 
-## Faza 2 — Auth + onboarding
+## Faza 2 — Auth + onboarding ✅ Isporučeno
 
-- **Prijava** (`/s/:slug` je već multi-tenant; login koristi postojeći `salon_accounts` +
-  bcrypt), potpisani session cookie, logout, zaštita svih tenant ruta.
-- **Registracija salona** sa početne strane: ime → slug, email, lozinka → **onboarding wizard u
-  3 koraka** (radno vreme → usluge → radnici) i pravo u kalendar. Ovo je ključno za konverziju sa
-  landing strane.
+- **Prijava**: po salonu (`/s/:slug/prijava`) i globalna (`/prijava`, lookup po email-u preko
+  SECURITY DEFINER funkcije — RLS ostaje netaknut). bcrypt + potpisani session cookie
+  (HMAC-SHA256, HttpOnly, SameSite=Lax, 30 dana, `SESSION_SECRET`). Odjava u "Više" tabu.
+- **Zaštita svih tenant ruta**: preHandler posle tenant resolve-a; HTMX zahtevi dobijaju
+  `HX-Redirect`, obični 302 na prijavu salona.
+- **Registracija salona** (`/registracija`): ime → slug (transliteracija š/đ/č/ć/ž, kolizija →
+  `-2`, `-3`…), email, lozinka; salon + nalog + default radno vreme u jednoj transakciji →
+  **onboarding wizard u 3 koraka** (radno vreme → usluge → radnici, korak 3 preskočiv) i pravo
+  u kalendar.
+- Verifikovano: login (pogrešna/tačna lozinka, oba oblika), zaštita ruta sa/bez sesije, HTMX 401
+  + HX-Redirect, ceo registracioni flow sa UTF-8 imenom, dupli email (422, bez salona-siročeta),
+  dupli slug, izolacija sesija među salonima; typecheck + 17 vitest testova.
 - Reset lozinke preko email-a (kasnije u fazi; MVP može ručno).
 
 ## Faza 3 — Kompletne app opcije (CRUD ekrani)
@@ -114,7 +122,7 @@ health-check.
 ## Redosled implementacije
 
 1. ✅ Faza 1 — Mobile + PWA
-2. Faza 2 — Auth + registracija + onboarding
+2. ✅ Faza 2 — Auth + registracija + onboarding
 3. Faza 4 — Početna strana
 4. Faza 3 — CRUD ekrani
 5. Faza 5 — Premium gating

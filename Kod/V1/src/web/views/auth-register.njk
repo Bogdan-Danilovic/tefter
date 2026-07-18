@@ -1,0 +1,39 @@
+{% extends "layout.njk" %}
+{% block title %}Registracija · Tefter{% endblock %}
+{% block content %}
+<div class="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center px-5 py-10">
+  <div class="mb-8 text-center">
+    <p class="text-[26px] font-semibold tracking-tight">Tefter<span class="text-now">.</span></p>
+    <p class="mt-1 text-sm text-muted">Registruj salon — spreman za rad za 2 minuta.</p>
+  </div>
+
+  <form method="post" action="/registracija" class="flex flex-col gap-4">
+    <div>
+      <label class="field-label" for="salonName">Ime salona</label>
+      <input class="field" type="text" id="salonName" name="salonName" value="{{ values.salonName }}"
+             placeholder="npr. Studio Mari" autocomplete="organization" required autofocus />
+      {% if errors.salonName %}<p class="field-error">{{ errors.salonName }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="field-label" for="email">Email</label>
+      <input class="field" type="email" id="email" name="email" value="{{ values.email }}"
+             autocomplete="email" inputmode="email" required />
+      {% if errors.email %}<p class="field-error">{{ errors.email }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="field-label" for="password">Lozinka</label>
+      <input class="field" type="password" id="password" name="password"
+             autocomplete="new-password" minlength="8" required />
+      <p class="mt-1 text-xs text-muted">Najmanje 8 znakova.</p>
+      {% if errors.password %}<p class="field-error">{{ errors.password }}</p>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary h-12 w-full text-[15px]">Kreiraj salon</button>
+  </form>
+
+  <p class="mt-6 text-center text-sm text-muted">
+    Već imaš nalog?
+    <a href="/prijava" class="font-medium text-ink underline underline-offset-2">Prijavi se</a>
+  </p>
+</div>
+{% endblock %}

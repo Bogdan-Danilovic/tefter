@@ -1,0 +1,56 @@
+{% extends "layout.njk" %}
+{% block title %}Usluge · Tefter{% endblock %}
+{% block content %}
+<div class="mx-auto w-full max-w-sm px-5 pb-16 pt-10">
+  {% set step = 2 %}
+  {% set heading = "Usluge" %}
+  {% set sub = "Šta radite? Trajanje i cena se povlače u svaki termin." %}
+  {% include "partials/onboarding-head.njk" %}
+
+  {% if existing|length %}
+  <div class="mb-4">
+    <p class="field-label">Već dodato</p>
+    <div class="flex flex-wrap gap-1.5">
+      {% for e in existing %}
+      <span class="chip text-[13px]">{{ e.name }} · {{ e.defaultDurationMin }} min</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" action="/s/{{ s.slug }}/podesi/usluge" class="flex flex-col gap-2.5"
+        x-data="{ rows: {{ initialRows | json }} }">
+    <template x-for="(r, i) in rows" :key="i">
+      <div class="relative rounded-xl border border-line bg-surface p-3">
+        <button type="button" class="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:text-ink"
+                x-show="rows.length > 1" @click="rows.splice(i, 1)" aria-label="Ukloni red">✕</button>
+        <div class="flex flex-col gap-2">
+          <input class="field pr-9" type="text" name="svcName" x-model="r.name"
+                 :placeholder="i === 0 ? 'npr. Šišanje' : 'Naziv usluge'" />
+          <div class="grid grid-cols-2 gap-2">
+            <div class="relative">
+              <input class="field pr-11 tabular-nums" type="text" inputmode="numeric"
+                     name="svcDuration" x-model="r.duration" placeholder="30" />
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">min</span>
+            </div>
+            <div class="relative">
+              <input class="field pr-12 tabular-nums" type="text" inputmode="numeric"
+                     name="svcPrice" x-model="r.price" placeholder="1.200" />
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">RSD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <button type="button" class="btn btn-ghost self-start px-2"
+            @click="rows.push({ name: '', duration: '', price: '' })">+ Dodaj još jednu</button>
+
+    {% if error %}
+    <p class="rounded-lg bg-now/10 px-3 py-2.5 text-sm text-now">{{ error }}</p>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary mt-2 h-12 w-full text-[15px]">Nastavi</button>
+  </form>
+</div>
+{% endblock %}

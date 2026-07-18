@@ -1,0 +1,43 @@
+{% extends "layout.njk" %}
+{% block title %}Radnici · Tefter{% endblock %}
+{% block content %}
+<div class="mx-auto w-full max-w-sm px-5 pb-16 pt-10">
+  {% set step = 3 %}
+  {% set heading = "Radnici" %}
+  {% set sub = "Ko radi u salonu? Svako dobija svoju boju u kalendaru. Ako radiš sam/a, slobodno preskoči." %}
+  {% include "partials/onboarding-head.njk" %}
+
+  {% if existing|length %}
+  <div class="mb-4">
+    <p class="field-label">Već dodato</p>
+    <div class="flex flex-wrap gap-1.5">
+      {% for e in existing %}
+      <span class="chip text-[13px]">
+        <span class="h-2.5 w-2.5 rounded-full" style="background:{{ e.color }}"></span>{{ e.fullName }}
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" action="/s/{{ s.slug }}/podesi/radnici" class="flex flex-col gap-2.5"
+        x-data="{ rows: {{ initialRows | json }}, palette: {{ palette | json }}, offset: {{ existing|length }} }">
+    <template x-for="(r, i) in rows" :key="i">
+      <div class="flex items-center gap-3 rounded-xl border border-line bg-surface p-3">
+        <span class="h-3.5 w-3.5 flex-none rounded-full"
+              :style="'background:' + palette[(offset + i) % palette.length]"></span>
+        <input class="field" type="text" name="stfName" x-model="r.name"
+               :placeholder="i === 0 ? 'npr. Ana' : 'Ime radnika'" />
+        <button type="button" class="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-muted hover:text-ink"
+                x-show="rows.length > 1" @click="rows.splice(i, 1)" aria-label="Ukloni red">✕</button>
+      </div>
+    </template>
+
+    <button type="button" class="btn btn-ghost self-start px-2"
+            @click="rows.push({ name: '' })">+ Dodaj još jednog</button>
+
+    <button type="submit" class="btn btn-primary mt-2 h-12 w-full text-[15px]">Završi — u kalendar</button>
+    <a href="/s/{{ s.slug }}/day" class="btn btn-ghost h-11 w-full">Preskoči za sada</a>
+  </form>
+</div>
+{% endblock %}
