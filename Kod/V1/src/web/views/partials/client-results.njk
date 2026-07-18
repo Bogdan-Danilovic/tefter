@@ -1,0 +1,16 @@
+<div class="pop">
+  {% for r in results %}
+  <button type="button" class="pop-item justify-between"
+          data-id="{{ r.id }}" data-name="{{ r.fullName }}" data-phone="{{ r.phone }}"
+          @click="selectExisting($el.dataset.id, $el.dataset.name, $el.dataset.phone)">
+    <span class="truncate">{{ r.fullName }}</span>
+    <span class="text-xs text-muted tabular-nums">{{ r.phone }}</span>
+  </button>
+  {% endfor %}
+
+  {% if q %}
+  <button type="button" class="pop-item border-t border-line text-muted" @click="startNew()">
+    <span>+ Dodaj novog klijenta „<span class="font-medium text-ink">{{ q }}</span>”</span>
+  </button>
+  {% endif %}
+</div>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termini — prototip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF7F2;
+    --surface:#FFFFFF;
+    --surface-alt:#F1ECE4;
+    --text:#2A2724;
+    --text-muted:#948B7F;
+    --line:#E7E0D4;
+    --accent:#B4577A;
+    --accent-soft:#F5E3EA;
+    --accent-dark:#8F4362;
+    --sage:#6B8F71;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 80px;
+  }
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+    gap:10px;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:-0.01em;
+  }
+  .brand span{color:var(--accent);}
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+    white-space:nowrap;
+  }
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-primary:active{transform:scale(0.97);}
+  .btn-primary:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--accent-dark);
+    outline-offset:2px;
+  }
+  .btn-block{width:100%;}
+  .btn-ghost{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:9px 14px;
+    border-radius:10px;
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--surface-alt);}
+
+  .month-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .month-nav .month-label{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:500;
+    text-transform:capitalize;
+  }
+  .month-nav-btns{display:flex; gap:6px;}
+  .nav-arrow{
+    width:34px; height:34px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text);
+    font-size:16px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-arrow:hover{background:var(--surface-alt);}
+
+  .employee-filter{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .12s ease;
+    color:var(--text-muted);
+  }
+  .pill .dot{width:8px; height:8px; border-radius:50%;}
+  .pill.active{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+    color:var(--accent-dark);
+  }
+
+  .weekday-row{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    margin-bottom:4px;
+  }
+  .weekday-row div{
+    text-align:center;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    padding-bottom:6px;
+  }
+  .calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+  }
+  .day-cell{
+    aspect-ratio:1/1;
+    background:var(--surface);
+    border-radius:12px;
+    border:1px solid var(--line);
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    position:relative;
+  }
+  .day-cell:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(43,39,36,0.08);
+    border-color:var(--accent);
+  }
+  .day-cell.empty{
+    background:transparent;
+    border:none;
+    cursor:default;
+  }
+  .day-cell.empty:hover{transform:none; box-shadow:none;}
+  .day-cell.today{border-color:var(--accent); border-width:2px;}
+  .day-num{font-size:13px; font-weight:600;}
+  .day-cell.today .day-num{color:var(--accent-dark);}
+  .day-dots{display:flex; flex-wrap:wrap; gap:3px;}
+  .day-dots .dot{width:6px; height:6px; border-radius:50%;}
+  .day-more{font-size:9px; color:var(--text-muted); font-weight:600;}
+
+  /* Overlay + day panel */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(42,39,36,0.35);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:20;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+
+  .day-panel{
+    position:fixed;
+    top:0; right:0;
+    height:100%;
+    width:400px;
+    max-width:92vw;
+    background:var(--bg);
+    box-shadow:-8px 0 30px rgba(0,0,0,0.12);
+    transform:translateX(100%);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+    z-index:21;
+    display:flex;
+    flex-direction:column;
+  }
+  .day-panel.show{transform:translateX(0);}
+  .day-panel-header{
+    padding:20px 20px 14px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .day-panel-header h2{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:20px;
+    text-transform:capitalize;
+  }
+  .close-btn{
+    background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted);
+    width:30px; height:30px;
+  }
+  .appt-list{
+    flex:1;
+    overflow-y:auto;
+    padding:14px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--text-muted);
+    font-size:14px;
+    padding:40px 10px;
+    line-height:1.5;
+  }
+  .appt-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .appt-time{
+    font-weight:700;
+    font-size:14px;
+    min-width:44px;
+    color:var(--accent-dark);
+  }
+  .appt-info{flex:1;}
+  .appt-client{font-weight:600; font-size:14px;}
+  .appt-service{font-size:13px; color:var(--text-muted); margin-top:2px;}
+  .appt-meta{display:flex; align-items:center; gap:6px; margin-top:6px;}
+  .appt-emp-tag{
+    display:flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:600; color:var(--text-muted);
+  }
+  .appt-emp-tag .dot{width:7px; height:7px; border-radius:50%;}
+  .appt-delete{
+    background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px;
+    padding:4px;
+  }
+  .appt-delete:hover{color:var(--accent-dark);}
+
+  .day-panel-footer{
+    padding:16px 20px 20px;
+    border-top:1px solid var(--line);
+  }
+
+  /* Modal */
+  .modal{
+    position:fixed; inset:0;
+    z-index:30;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(42,39,36,0.35);
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .modal.show{opacity:1; pointer-events:auto;}
+  .modal-card{
+    background:var(--bg);
+    width:100%;
+    max-width:440px;
+    max-height:88vh;
+    overflow-y:auto;
+    border-radius:20px 20px 0 0;
+    padding:22px 22px 26px;
+    transform:translateY(30px);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .modal.show .modal-card{transform:translateY(0);}
+  @media (min-width:480px){
+    .modal{align-items:center;}
+    .modal-card{border-radius:20px;}
+  }
+  .modal-card h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  .field-error{
+    color:var(--accent-dark);
+    font-size:12px;
+    margin-top:5px;
+    display:none;
+  }
+  .field-error.show{display:block;}
+  .field input.invalid, .field select.invalid{
+    border-color:var(--accent-dark);
+  }
+  .field input, .field select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--text);
+  }
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:7px;}
+  .chip{
+    padding:7px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    font-size:13px;
+    cursor:pointer;
+    color:var(--text);
+  }
+  .chip.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .modal-actions .btn-ghost, .modal-actions .btn-primary{flex:1;}
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--text);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:500;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:50;
+    max-width:88vw;
+    text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--accent-dark);}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="brand">Termini<span>.</span></div>
+    <button class="btn-primary" id="newApptBtn">+ Novi termin</button>
+  </header>
+
+  <div class="month-nav">
+    <div class="month-label" id="monthLabel">Jul 2026</div>
+    <div class="month-nav-btns">
+      <button class="nav-arrow" id="prevMonth">‹</button>
+      <button class="nav-arrow" id="nextMonth">›</button>
+    </div>
+  </div>
+
+  <div class="employee-filter" id="employeeFilter"></div>
+
+  <div class="weekday-row">
+    <div>Pon</div><div>Uto</div><div>Sre</div><div>Čet</div><div>Pet</div><div>Sub</div><div>Ned</div>
+  </div>
+  <div class="calendar-grid" id="calendarGrid"></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="day-panel" id="dayPanel">
+  <div class="day-panel-header">
+    <h2 id="dayPanelTitle">Datum</h2>
+    <button class="close-btn" id="closeDayPanel">✕</button>
+  </div>
+  <div class="appt-list" id="apptList"></div>
+  <div class="day-panel-footer">
+    <button class="btn-primary btn-block" id="addFromPanelBtn">+ Dodaj termin</button>
+  </div>
+</aside>
+
+<div class="modal" id="apptModal">
+  <div class="modal-card">
+    <h3>Novi termin</h3>
+    <form id="apptForm">
+      <div class="field">
+        <label for="clientName">Klijent</label>
+        <input type="text" id="clientName" list="clientSuggestions" placeholder="Ime i prezime">
+        <datalist id="clientSuggestions"></datalist>
+        <div class="field-error" id="clientNameError"></div>
+      </div>
+      <div class="field">
+        <label for="clientPhone">Telefon</label>
+        <input type="tel" id="clientPhone" placeholder="06x xxx xxxx">
+      </div>
+      <div class="field">
+        <label>Usluga</label>
+        <div class="chip-row" id="serviceChips"></div>
+        <input type="text" id="customService" placeholder="Ili upiši uslugu ručno..." style="margin-top:8px;">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="apptTime">Vreme</label>
+          <input type="time" id="apptTime">
+        </div>
+        <div class="field">
+          <label for="apptDuration">Trajanje (min)</label>
+          <input type="number" id="apptDuration" value="30" min="5" step="5">
+        </div>
+      </div>
+      <div class="field" id="employeeFieldWrap">
+        <label for="apptEmployee">Radi</label>
+        <select id="apptEmployee"></select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="cancelModal">Otkaži</button>
+        <button type="button" class="btn-primary" id="saveApptBtn">Sačuvaj termin</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Mock data ----------
+const employees = [
+  {id:'ana', name:'Ana', color:'#B4577A'},
+  {id:'marko', name:'Marko', color:'#4A8B8C'},
+  {id:'jovana', name:'Jovana', color:'#C98A3E'},
+];
+const services = ['Šišanje','Feniranje','Farbanje','Pramenovi','Manikir','Pedikir','Brijanje'];
+const knownClients = ['Milica Jovanović','Nikola Petrović','Ana Ilić','Stefan Marković','Teodora Nikolić'];
+
+let appointments = []; // {id, date:'YYYY-MM-DD', time, duration, client, phone, service, employeeId}
+
+function makeId(){
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+}
+let activeEmployeeFilter = 'all';
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let selectedDate = null;
+
+// seed a few demo appointments in the current month
+(function seed(){
+  const y = currentYear, m = currentMonth;
+  const pad = n => String(n).padStart(2,'0');
+  const mk = (d,time,dur,client,phone,service,emp) =>
+    appointments.push({id:makeId(), date:`${y}-${pad(m+1)}-${pad(d)}`, time, duration:dur, client, phone, service, employeeId:emp});
+  mk(14,'10:00',45,'Milica Jovanović','064 111 2233','Šišanje','ana');
+  mk(14,'13:30',60,'Nikola Petrović','063 222 3344','Farbanje','marko');
+  mk(16,'09:15',30,'Ana Ilić','065 333 4455','Manikir','jovana');
+  mk(16,'16:00',30,'Stefan Marković','061 444 5566','Šišanje','ana');
+  mk(20,'11:00',90,'Teodora Nikolić','062 555 6677','Pramenovi','marko');
+})();
+
+// ---------- Employee filter ----------
+function renderEmployeeFilter(){
+  const wrap = document.getElementById('employeeFilter');
+  wrap.innerHTML = '';
+  const allPill = document.createElement('div');
+  allPill.className = 'pill' + (activeEmployeeFilter==='all' ? ' active' : '');
+  allPill.textContent = 'Svi';
+  allPill.onclick = () => { activeEmployeeFilter = 'all'; renderEmployeeFilter(); renderCalendar(); };
+  wrap.appendChild(allPill);
+  employees.forEach(emp => {
+    const pill = document.createElement('div');
+    pill.className = 'pill' + (activeEmployeeFilter===emp.id ? ' active' : '');
+    pill.innerHTML = `<span class="dot" style="background:${emp.color}"></span>${emp.name}`;
+    pill.onclick = () => { activeEmployeeFilter = emp.id; renderEmployeeFilter(); renderCalendar(); };
+    wrap.appendChild(pill);
+  });
+}
+
+// ---------- Calendar ----------
+const monthNames = ['Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'];
+
+function apptsForDate(dateStr){
+  return appointments
+    .filter(a => a.date === dateStr && (activeEmployeeFilter==='all' || a.employeeId===activeEmployeeFilter))
+    .sort((a,b) => a.time.localeCompare(b.time));
+}
+
+function renderCalendar(){
+  document.getElementById('monthLabel').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  // JS getDay: 0=Sun..6=Sat -> convert to Mon-first index
+  let startOffset = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+
+  const todayStr = new Date().toISOString().slice(0,10);
+  const pad = n => String(n).padStart(2,'0');
+
+  for(let i=0; i<startOffset; i++){
+    const cell = document.createElement('div');
+    cell.className = 'day-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const dateStr = `${currentYear}-${pad(currentMonth+1)}-${pad(d)}`;
+    const cell = document.createElement('div');
+    cell.className = 'day-cell' + (dateStr===todayStr ? ' today' : '');
+    const dayAppts = apptsForDate(dateStr);
+
+    const dotsHtml = dayAppts.slice(0,6).map(a => {
+      const emp = employees.find(e=>e.id===a.employeeId);
+      return `<span class="dot" style="background:${emp ? emp.color : '#999'}"></span>`;
+    }).join('');
+
+    cell.innerHTML = `
+      <div class="day-num">${d}</div>
+      <div class="day-dots">${dotsHtml}${dayAppts.length>6 ? `<span class="day-more">+${dayAppts.length-6}</span>` : ''}</div>
+    `;
+    cell.onclick = () => openDayPanel(dateStr);
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('prevMonth').onclick = () => {
+  currentMonth--; if(currentMonth<0){currentMonth=11; currentYear--;}
+  renderCalendar();
+};
+document.getElementById('nextMonth').onclick = () => {
+  currentMonth++; if(currentMonth>11){currentMonth=0; currentYear++;}
+  renderCalendar();
+};
+
+// ---------- Day panel ----------
+const overlay = document.getElementById('overlay');
+const dayPanel = document.getElementById('dayPanel');
+
+function formatDateLabel(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'];
+  return `${days[d.getDay()]}, ${d.getDate()}. ${monthNames[d.getMonth()].toLowerCase()}`;
+}
+
+function openDayPanel(dateStr){
+  selectedDate = dateStr;
+  document.getElementById('dayPanelTitle').textContent = formatDateLabel(dateStr);
+  renderApptList();
+  overlay.classList.add('show');
+  dayPanel.classList.add('show');
+}
+function closeDayPanel(){
+  overlay.classList.remove('show');
+  dayPanel.classList.remove('show');
+}
+document.getElementById('closeDayPanel').onclick = closeDayPanel;
+overlay.onclick = () => { closeDayPanel(); closeModal(); };
+
+function renderApptList(){
+  const list = document.getElementById('apptList');
+  const dayAppts = apptsForDate(selectedDate);
+  if(dayAppts.length === 0){
+    list.innerHTML = `<div class="empty-state">Nema zakazanih termina za ovaj dan.<br>Dodaj prvi termin ispod.</div>`;
+    return;
+  }
+  list.innerHTML = dayAppts.map(a => {
+    const emp = employees.find(e=>e.id===a.employeeId);
+    return `
+      <div class="appt-card">
+        <div class="appt-time">${a.time}</div>
+        <div class="appt-info">
+          <div class="appt-client">${a.client}</div>
+          <div class="appt-service">${a.service} · ${a.duration} min</div>
+          <div class="appt-meta">
+            <span class="appt-emp-tag"><span class="dot" style="background:${emp?emp.color:'#999'}"></span>${emp?emp.name:''}</span>
+          </div>
+        </div>
+        <button class="appt-delete" onclick="deleteAppt('${a.id}')" aria-label="Obriši termin">🗑</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function deleteAppt(id){
+  appointments = appointments.filter(a => a.id !== id);
+  renderApptList();
+  renderCalendar();
+}
+
+// ---------- Modal ----------
+const modal = document.getElementById('apptModal');
+let selectedService = null;
+
+function renderServiceChips(){
+  const wrap = document.getElementById('serviceChips');
+  wrap.innerHTML = services.map(s => `<div class="chip" data-service="${s}">${s}</div>`).join('');
+  wrap.querySelectorAll('.chip').forEach(chip => {
+    chip.onclick = () => {
+      wrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      selectedService = chip.dataset.service;
+      document.getElementById('customService').value = '';
+    };
+  });
+}
+
+function renderEmployeeSelect(){
+  const sel = document.getElementById('apptEmployee');
+  sel.innerHTML = employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+  document.getElementById('employeeFieldWrap').style.display = employees.length > 1 ? 'block' : 'none';
+}
+
+function renderClientSuggestions(){
+  document.getElementById('clientSuggestions').innerHTML =
+    knownClients.map(c => `<option value="${c}">`).join('');
+}
+
+function openModal(){
+  document.getElementById('apptForm').reset();
+  selectedService = null;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('clientName').classList.remove('invalid');
+  document.getElementById('clientNameError').classList.remove('show');
+  document.getElementById('apptTime').value = '10:00';
+  modal.classList.add('show');
+  document.querySelector('.modal-card').scrollTop = 0;
+}
+function closeModal(){ modal.classList.remove('show'); }
+
+document.getElementById('newApptBtn').onclick = () => {
+  if(!selectedDate){
+    const todayStr = new Date().toISOString().slice(0,10);
+    selectedDate = todayStr;
+  }
+  openModal();
+};
+document.getElementById('addFromPanelBtn').onclick = openModal;
+document.getElementById('cancelModal').onclick = closeModal;
+
+function saveAppointment(){
+  try{
+    const clientInput = document.getElementById('clientName');
+    const timeInput = document.getElementById('apptTime');
+    const clientError = document.getElementById('clientNameError');
+
+    const client = clientInput.value.trim();
+    const time = timeInput.value;
+
+    // manualna validacija sa vidljivom porukom (native HTML5 validaciju
+    // neki mobilni webview-ovi ne prikazuju, pa dugme deluje "mrtvo")
+    let hasError = false;
+    if(!client){
+      clientInput.classList.add('invalid');
+      clientError.textContent = 'Unesi ime klijenta';
+      clientError.classList.add('show');
+      hasError = true;
+    } else {
+      clientInput.classList.remove('invalid');
+      clientError.classList.remove('show');
+    }
+    if(!time){
+      timeInput.classList.add('invalid');
+      hasError = true;
+    } else {
+      timeInput.classList.remove('invalid');
+    }
+
+    if(hasError){
+      (clientInput.classList.contains('invalid') ? clientInput : timeInput)
+        .scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    const phone = document.getElementById('clientPhone').value.trim();
+    const custom = document.getElementById('customService').value.trim();
+    const service = custom || selectedService || 'Usluga';
+    const duration = parseInt(document.getElementById('apptDuration').value) || 30;
+    const employeeId = employees.length > 1 ? document.getElementById('apptEmployee').value : employees[0].id;
+
+    appointments.push({
+      id: makeId(),
+      date: selectedDate,
+      time, duration, client, phone, service, employeeId
+    });
+
+    closeModal();
+    showToast('Termin sačuvan ✓');
+    if(!dayPanel.classList.contains('show')) openDayPanel(selectedDate);
+    else { renderApptList(); }
+    renderCalendar();
+  } catch(err){
+    showToast('Greška: ' + err.message, true);
+  }
+}
+
+// Dugme je type="button" (ne submit) — čuvanje se vezuje direktno na klik,
+// bez oslanjanja na form "submit" event koji u pojedinim mobilnim
+// webview/sandboxovanim prikazima nepouzdano radi.
+document.getElementById('saveApptBtn').addEventListener('click', saveAppointment);
+
+// Enter u polju i dalje treba da sačuva termin (native ponašanje forme)
+document.getElementById('apptForm').addEventListener('submit', e => {
+  e.preventDefault();
+  saveAppointment();
+});
+
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ---------- Init ----------
+renderEmployeeFilter();
+renderServiceChips();
+renderEmployeeSelect();
+renderClientSuggestions();
+renderCalendar();
+</script>
+
+</body>
+</html>

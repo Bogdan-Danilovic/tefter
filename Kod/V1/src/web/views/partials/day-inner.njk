@@ -1,0 +1,61 @@
+<header class="sticky top-0 z-30 border-b border-line bg-bg/85 backdrop-blur">
+  <div class="flex items-center justify-between px-4 pt-3">
+    <div class="min-w-0">
+      <p class="truncate text-[13px] font-medium text-muted">{{ salon.name }}</p>
+      <h1 class="text-lg font-semibold capitalize tracking-tight">{{ day.dateLabel }}</h1>
+    </div>
+    <div class="flex items-center gap-1">
+      <a class="icon-btn" aria-label="Prethodni dan"
+         hx-get="/s/{{ day.slug }}/day/{{ day.prevDate }}"
+         hx-target="#day-view" hx-swap="innerHTML" hx-push-url="true">‹</a>
+      {% if not day.isToday %}
+      <a class="btn btn-ghost px-2.5 text-[13px]"
+         hx-get="/s/{{ day.slug }}/day/{{ day.today }}"
+         hx-target="#day-view" hx-swap="innerHTML" hx-push-url="true">Danas</a>
+      {% endif %}
+      <a class="icon-btn" aria-label="Sledeći dan"
+         hx-get="/s/{{ day.slug }}/day/{{ day.nextDate }}"
+         hx-target="#day-view" hx-swap="innerHTML" hx-push-url="true">›</a>
+    </div>
+  </div>
+
+  <div class="flex gap-1 px-3 pb-2.5 pt-2">
+    {% for d in day.weekStrip %}
+    <a class="day-pill flex-1 {% if d.isCurrent %}day-pill-current{% endif %}"
+       hx-get="/s/{{ day.slug }}/day/{{ d.date }}"
+       hx-target="#day-view" hx-swap="innerHTML" hx-push-url="true">
+      <span class="text-[11px] {% if d.isCurrent %}text-white/70{% else %}text-muted{% endif %}">{{ d.day }}</span>
+      <span class="text-[13px] font-medium tabular-nums {% if d.isToday and not d.isCurrent %}text-now{% endif %}">{{ d.num }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if day.legend|length %}
+  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line px-4 py-2">
+    {% for s in day.legend %}
+    <span class="inline-flex items-center gap-1.5 text-[12px] text-muted">
+      <span class="h-2.5 w-2.5 rounded-full" style="background:{{ s.color }}"></span>{{ s.name }}
+    </span>
+    {% endfor %}
+    <span class="inline-flex items-center gap-1.5 text-[12px] text-muted">
+      <span class="h-2.5 w-2.5 rounded-full" style="background:#94a3b8"></span>Bilo ko
+    </span>
+  </div>
+  {% endif %}
+</header>
+
+<div id="day-scroll" class="min-h-0 flex-1 overflow-y-auto"
+     style="padding-bottom: calc(6.5rem + env(safe-area-inset-bottom))"
+     x-data="dayScroll({ showNow: {{ day.showNow }}, nowTopPx: {{ day.nowTopPx }}, prev: '/s/{{ day.slug }}/day/{{ day.prevDate }}', next: '/s/{{ day.slug }}/day/{{ day.nextDate }}' })"
+     x-init="init()">
+  <div id="day-column">
+    {% include "partials/day-column.njk" %}
+  </div>
+</div>
+
+<!-- FAB: novi termin (vreme = sledeći kvart danas / početak radnog vremena) -->
+<button type="button" class="fab" aria-label="Novi termin"
+        hx-get="/s/{{ day.slug }}/appointments/new?start={{ day.fabStart }}"
+        hx-target="#modal" hx-swap="innerHTML">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>

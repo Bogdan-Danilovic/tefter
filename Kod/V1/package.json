@@ -1,0 +1,44 @@
+{
+  "name": "tefter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "css": "tailwindcss -i src/web/styles/app.css -o public/app.css",
+    "css:watch": "tailwindcss -i src/web/styles/app.css -o public/app.css --watch",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^8.0.1",
+    "@fastify/static": "^8.0.3",
+    "@fastify/view": "^10.0.1",
+    "alpinejs": "^3.14.3",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.4",
+    "fastify": "^5.1.0",
+    "htmx.org": "^2.0.3",
+    "nunjucks": "^3.2.4",
+    "postgres": "^3.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/nunjucks": "^3.2.6",
+    "@types/node": "^22.9.0",
+    "drizzle-kit": "^0.28.1",
+    "tailwindcss": "^3.4.15",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}

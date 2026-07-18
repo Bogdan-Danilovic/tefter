@@ -1,0 +1,12 @@
+<div id="day-column" hx-swap-oob="true">{% include "partials/day-column.njk" %}</div>
+<div id="flash" hx-swap-oob="true" class="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4">
+  {% if overlaps | length %}
+  <div class="pointer-events-auto max-w-md rounded-xl border border-[#fcd9a5] bg-[#fff8ee] px-4 py-3 text-[13px] text-[#8a4b12] shadow-pop">
+    <p class="font-medium">Sačuvano — ali pažnja na preklapanje</p>
+    <p class="mt-0.5 text-[#a2865f]">
+      Radnik već ima termin u ovom intervalu:
+      {% for o in overlaps %}<span class="whitespace-nowrap">{{ o.clientName }} ({{ o.serviceName }}){% if not loop.last %}, {% endif %}</span>{% endfor %}.
+    </p>
+  </div>
+  {% endif %}
+</div>

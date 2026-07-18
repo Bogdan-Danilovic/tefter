@@ -1,0 +1,9 @@
+{% extends "layout.njk" %}
+{% block title %}{{ salon.name }} · {{ day.dateLabel }}{% endblock %}
+{% block content %}
+<div class="app-shell mx-auto w-full max-w-3xl">
+  <div id="day-view" class="flex min-h-0 flex-1 flex-col">
+    {% include "partials/day-inner.njk" %}
+  </div>
+</div>
+{% endblock %}

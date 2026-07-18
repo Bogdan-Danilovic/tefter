@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* --- kontrole ---------------------------------------------------------- */
+  /* Na telefonu veće touch mete (≥44px), na desktopu kompaktnije. */
+  .btn {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg px-3.5 text-sm font-medium transition-colors sm:h-9;
+  }
+  .btn-primary {
+    @apply bg-ink text-white hover:bg-black disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-ink/[0.05] hover:text-ink;
+  }
+  .btn-danger {
+    @apply text-now hover:bg-now/[0.08];
+  }
+  .icon-btn {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors hover:bg-ink/[0.05] hover:text-ink sm:h-9 sm:w-9;
+  }
+
+  /* 16px font na telefonu sprečava iOS auto-zoom na fokus. */
+  .field {
+    @apply h-11 w-full rounded-lg border border-line bg-surface px-3 text-base text-ink outline-none transition placeholder:text-muted/70 focus:border-ink/30 focus:ring-4 focus:ring-ink/[0.06] sm:h-10 sm:text-sm;
+  }
+  .field-label {
+    @apply mb-1.5 block text-xs font-medium text-muted;
+  }
+  .field-error {
+    @apply mt-1 text-xs text-now;
+  }
+
+  /* --- kalendar --------------------------------------------------------- */
+  .cal {
+    @apply relative grid;
+    grid-template-columns: 3.25rem 1fr;
+  }
+  .cal-gutter {
+    @apply relative;
+  }
+  .cal-hour-label {
+    @apply absolute right-2 -translate-y-1/2 text-[11px] tabular-nums text-muted;
+  }
+  .cal-body {
+    @apply relative border-l border-line;
+  }
+  .cal-slot {
+    @apply absolute inset-x-0 border-t border-line/70 transition-colors;
+  }
+  .cal-slot:hover {
+    @apply bg-ink/[0.035];
+  }
+  .cal-slot-hour {
+    @apply border-line-strong;
+  }
+  .cal-now {
+    @apply pointer-events-none absolute inset-x-0 z-20;
+    border-top: 2px solid theme("colors.now");
+  }
+  .cal-now::before {
+    content: "";
+    @apply absolute -left-1 -top-[5px] h-2 w-2 rounded-full;
+    background: theme("colors.now");
+  }
+  .cal-card {
+    @apply absolute z-10 flex overflow-hidden rounded-lg bg-surface text-left shadow-card ring-1 ring-line transition;
+  }
+  .cal-card:hover {
+    @apply ring-line-strong;
+    transform: translateY(-1px);
+  }
+  .cal-card-accent {
+    @apply flex-none;
+    width: 3px;
+    background: var(--staff, theme("colors.muted"));
+  }
+  .cal-card-body {
+    @apply min-w-0 px-2 py-1;
+  }
+  .cal-card-time {
+    @apply block text-[11px] tabular-nums text-muted;
+  }
+  .cal-card-client {
+    @apply block truncate text-[13px] font-medium leading-tight;
+  }
+  .cal-card-service {
+    @apply block truncate text-[11px] text-muted;
+  }
+
+  /* --- week strip ------------------------------------------------------- */
+  .day-pill {
+    @apply flex flex-col items-center rounded-lg px-2.5 py-1.5 text-center transition-colors hover:bg-ink/[0.05];
+  }
+  .day-pill-current {
+    @apply bg-ink text-white hover:bg-ink;
+  }
+
+  /* --- app shell (mobile-first) ----------------------------------------- */
+  .app-shell {
+    height: 100vh;
+    height: 100dvh;
+    @apply flex flex-col;
+  }
+
+  .bottom-nav {
+    @apply fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 backdrop-blur;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-nav-inner {
+    @apply mx-auto grid max-w-3xl grid-cols-4;
+  }
+  .bottom-nav-item {
+    @apply flex h-14 flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted transition-colors active:text-ink;
+  }
+  .bottom-nav-item svg {
+    @apply h-[22px] w-[22px];
+  }
+  .bottom-nav-active {
+    @apply text-ink;
+  }
+
+  .fab {
+    @apply fixed z-40 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white shadow-modal transition-transform active:scale-90;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    right: max(1rem, calc((100vw - 48rem) / 2 + 1rem));
+  }
+  .fab svg {
+    @apply h-6 w-6;
+  }
+
+  /* --- modal / bottom sheet ---------------------------------------------- */
+  .modal-root {
+    @apply fixed inset-0 z-50 flex items-end justify-center sm:items-center;
+  }
+  .modal-backdrop {
+    @apply absolute inset-0 bg-ink/25;
+    animation: tefter-fade 0.18s ease-out;
+  }
+  .modal-panel {
+    @apply relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-surface shadow-modal sm:max-w-md sm:rounded-2xl;
+    animation: tefter-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @media (min-width: 640px) {
+    .modal-panel {
+      animation: tefter-modal-in 0.16s ease-out;
+    }
+  }
+  .sheet-handle {
+    @apply mx-auto mt-2 h-1 w-9 flex-none rounded-full bg-ink/15 sm:hidden;
+  }
+
+  @keyframes tefter-sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes tefter-modal-in {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes tefter-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* --- dropdown / lista ------------------------------------------------- */
+  .pop {
+    @apply absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-line bg-surface shadow-pop;
+  }
+  .pop-item {
+    @apply flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-ink/[0.05];
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-lg border border-line bg-bg px-3 py-2 text-sm;
+  }
+}

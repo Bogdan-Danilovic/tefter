@@ -1,0 +1,43 @@
+{% if day.closed %}
+  <div class="flex flex-col items-center justify-center gap-1 px-6 py-24 text-center">
+    <p class="text-sm font-medium">Salon ne radi ovog dana</p>
+    <p class="text-[13px] text-muted">Izaberi drugi dan iz navigacije.</p>
+  </div>
+{% else %}
+  <div class="cal px-3 py-2" style="height: {{ day.gridHeightPx + 16 }}px">
+    <div class="cal-gutter">
+      {% for h in day.hourLabels %}
+        <div class="cal-hour-label" style="top: {{ h.topPx + 8 }}px">{{ h.label }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="cal-body">
+      {% for s in day.slots %}
+        <button type="button"
+          class="cal-slot {% if s.isHour %}cal-slot-hour{% endif %}"
+          style="top: {{ s.topPx }}px; height: {{ s.heightPx }}px"
+          hx-get="/s/{{ day.slug }}/appointments/new?start={{ s.startParam }}"
+          hx-target="#modal" hx-swap="innerHTML"
+          aria-label="Novi termin"></button>
+      {% endfor %}
+
+      {% if day.showNow %}
+        <div class="cal-now" style="top: {{ day.nowTopPx }}px"></div>
+      {% endif %}
+
+      {% for c in day.cards %}
+        <button type="button" class="cal-card"
+          style="top: {{ c.topPx }}px; height: {{ c.heightPx }}px; left: calc({{ c.leftPct }}% + 2px); width: calc({{ c.widthPct }}% - 4px); --staff: {{ c.staffColor }}"
+          hx-get="/s/{{ day.slug }}/appointments/{{ c.id }}/edit"
+          hx-target="#modal" hx-swap="innerHTML">
+          <span class="cal-card-accent"></span>
+          <span class="cal-card-body">
+            <span class="cal-card-time">{{ c.timeLabel }}</span>
+            <span class="cal-card-client">{{ c.clientName }}</span>
+            <span class="cal-card-service">{{ c.serviceName }} · {{ c.staffName }}</span>
+          </span>
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}

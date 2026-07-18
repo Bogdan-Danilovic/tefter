@@ -1,0 +1,133 @@
+<div class="modal-root" x-data="apptModal({{ m | json }})" x-init="init()"
+     @keydown.escape.window="close()">
+  <div class="modal-backdrop" @click="close()"></div>
+
+  <div class="modal-panel">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <header class="flex items-center justify-between border-b border-line px-4 py-3">
+      <h2 class="text-[15px] font-semibold">{{ "Izmena termina" if m.mode == "edit" else "Novi termin" }}</h2>
+      <button type="button" class="icon-btn" @click="close()" aria-label="Zatvori">✕</button>
+    </header>
+
+    <form class="flex flex-col gap-4 overflow-y-auto px-4 py-4"
+          hx-post="{{ m.actionUrl }}" hx-target="#modal" hx-swap="innerHTML">
+
+      <!-- KLIJENT -->
+      <div>
+        <label class="field-label">Klijent</label>
+
+        <!-- pretraga postojećih -->
+        <div x-show="clientMode === 'search'" class="relative">
+          <input class="field" type="text" placeholder="Ime ili telefon…" autocomplete="off"
+                 x-model="query" name="q"
+                 @keydown.enter.prevent
+                 hx-get="/s/{{ m.slug }}/clients/search"
+                 hx-trigger="input changed delay:200ms"
+                 hx-target="#client-results" hx-swap="innerHTML" hx-include="this" />
+          <div id="client-results"></div>
+        </div>
+
+        <!-- izabran postojeći -->
+        <div x-show="clientMode === 'selected'" class="flex items-center justify-between chip">
+          <span class="min-w-0">
+            <span class="block truncate font-medium" x-text="clientName"></span>
+            <span class="block truncate text-xs text-muted tabular-nums" x-text="clientPhone"></span>
+          </span>
+          <button type="button" class="btn btn-ghost px-2 text-[13px]" @click="clearClient()">Promeni</button>
+        </div>
+
+        <!-- novi klijent -->
+        <div x-show="clientMode === 'new'" class="flex flex-col gap-2">
+          <input class="field" type="text" placeholder="Ime i prezime" x-model="clientName" />
+          <input class="field" type="tel" placeholder="Telefon (obavezno)" x-model="newPhone" />
+          <button type="button" class="self-start text-[13px] text-muted hover:text-ink" @click="clearClient()">‹ nazad na pretragu</button>
+        </div>
+
+        {% if m.errors.client %}<p class="field-error">{{ m.errors.client }}</p>{% endif %}
+        {% if m.errors.clientPhone %}<p class="field-error">{{ m.errors.clientPhone }}</p>{% endif %}
+
+        <!-- hidden: submit klijenta -->
+        <input type="hidden" name="clientId"       :value="clientMode === 'selected' ? clientId : ''" />
+        <input type="hidden" name="clientName"     :value="clientMode === 'selected' ? clientName : ''" />
+        <input type="hidden" name="clientPhone"    :value="clientMode === 'selected' ? clientPhone : ''" />
+        <input type="hidden" name="newClientName"  :value="clientMode === 'new' ? clientName : ''" />
+        <input type="hidden" name="newClientPhone" :value="clientMode === 'new' ? newPhone : ''" />
+      </div>
+
+      <!-- USLUGA -->
+      <div class="relative" @click.outside="serviceOpen = false">
+        <label class="field-label">Usluga</label>
+        <input class="field" type="text" placeholder="Izaberi uslugu…" autocomplete="off"
+               x-model="serviceQuery" @focus="serviceOpen = true" @click="serviceOpen = true"
+               @keydown.enter.prevent />
+        <input type="hidden" name="serviceId" :value="serviceId" />
+        <div class="pop" x-show="serviceOpen" x-transition.opacity style="display:none">
+          <template x-for="s in filteredServices" :key="s.id">
+            <button type="button" class="pop-item justify-between" @click="pickService(s)">
+              <span x-text="s.name"></span>
+              <span class="text-xs text-muted tabular-nums" x-text="s.durationMin + ' min · ' + s.priceDinars + ' RSD'"></span>
+            </button>
+          </template>
+          <p class="px-3 py-2 text-sm text-muted" x-show="filteredServices.length === 0">Nema usluge.</p>
+        </div>
+        {% if m.errors.service %}<p class="field-error">{{ m.errors.service }}</p>{% endif %}
+      </div>
+
+      <!-- VREME + RADNIK -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Početak</label>
+          <input class="field tabular-nums" type="time" step="900" name="startTime" x-model="start" />
+          <p class="mt-1 text-xs text-muted">
+            <span x-text="durationMin"></span> min · do <span class="tabular-nums" x-text="endHm"></span>
+          </p>
+          {% if m.errors.startTime %}<p class="field-error">{{ m.errors.startTime }}</p>{% endif %}
+          <input type="hidden" name="durationMin" :value="durationMin" />
+        </div>
+        <div>
+          <label class="field-label">Radnik</label>
+          <select class="field" name="staffId" x-model="staffId">
+            <option value="">Bilo ko</option>
+            {% for s in m.staffList %}
+            <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- CENA -->
+      <div>
+        <label class="field-label">Cena</label>
+        <div class="relative">
+          <input class="field pr-12 tabular-nums" type="text" inputmode="numeric" name="price"
+                 x-model="price" @input="priceTouched = true" placeholder="0" />
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">RSD</span>
+        </div>
+        {% if m.errors.price %}<p class="field-error">{{ m.errors.price }}</p>{% endif %}
+      </div>
+
+      <!-- NAPOMENA -->
+      <div>
+        <label class="field-label">Napomena</label>
+        <textarea class="field h-auto py-2" rows="2" name="note" x-model="note" placeholder="Opciono…"></textarea>
+      </div>
+
+      <input type="hidden" name="date" :value="date" />
+
+      <!-- FOOTER (sticky, iznad iOS home indikatora) -->
+      <div class="sticky bottom-0 -mx-4 -mb-4 mt-1 flex items-center justify-between border-t border-line bg-surface px-4 pt-3"
+           style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+        {% if m.mode == "edit" %}
+        <button type="button" class="btn btn-danger px-2.5"
+                hx-post="/s/{{ m.slug }}/appointments/{{ m.apptId }}/cancel"
+                hx-target="#modal" hx-swap="innerHTML"
+                hx-confirm="Otkazati ovaj termin?">Otkaži termin</button>
+        {% else %}<span></span>{% endif %}
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-ghost" @click="close()">Zatvori</button>
+          <button type="submit" class="btn btn-primary px-4">Sačuvaj</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
