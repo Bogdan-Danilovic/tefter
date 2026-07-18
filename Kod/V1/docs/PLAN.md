@@ -1,7 +1,7 @@
 # Tefter — plan pune aplikacije
 
-> Status: Faza 1 (Mobile + PWA), Faza 2 (Auth + registracija + onboarding) i Faza 4 (Početna
-> strana) implementirane i verifikovane (2026-07-18).
+> Status: Faze 1 (Mobile + PWA), 2 (Auth + onboarding), 4 (Početna strana) i 3 (CRUD ekrani +
+> statistika) implementirane i verifikovane (2026-07-18).
 > Arhitektura je fiksna: Fastify + TypeScript, Nunjucks (server-side render), HTMX + Alpine.js
 > (NO React, NO JS build step), Tailwind CLI, PostgreSQL, Drizzle ORM, Zod, Vitest,
 > Docker Compose (app + Postgres + Caddy) na Hetzner VPS. Multi-tenant preko `salon_id` +
@@ -64,15 +64,19 @@ merenjem geometrije), swipe navigacija, service worker + manifest.
   dupli slug, izolacija sesija među salonima; typecheck + 17 vitest testova.
 - Reset lozinke preko email-a (kasnije u fazi; MVP može ručno).
 
-## Faza 3 — Kompletne app opcije (CRUD ekrani)
+## Faza 3 — Kompletne app opcije (CRUD ekrani) ✅ Isporučeno (bez nedeljnog pregleda)
 
-| Ekran | Sadržaj |
-|---|---|
-| **Klijenti** | lista + pretraga, profil klijenta: istorija termina, ukupna potrošnja, beleške, brzi poziv (`tel:`) i SMS (`sms:`) linkovi |
-| **Usluge** | dodavanje/izmena/deaktivacija, trajanje + cena |
-| **Radnici** | ime, boja (postojeća paleta), aktivacija |
-| **Podešavanja** | radno vreme po danu, početak nedelje, ime salona, jezik/valuta kasnije |
-| **Nedeljni pregled** | kompaktni 7-dnevni grid (broj termina + zauzetost po danu), tap → dnevni prikaz |
+| Ekran | Ruta | Stanje |
+|---|---|---|
+| **Klijenti** | `/klijenti`, `/klijenti/:id` | lista sa brojem dolazaka i potrošnjom, pretraga, novi klijent, profil: izmena imena/telefona/beleške, `tel:`/`sms:` dugmad, istorija termina (otkazani precrtani), brisanje (blokirano ako ima termine) |
+| **Usluge** | `/usluge` | lista (aktivne prve), dodavanje, izmena naziva/trajanja/cene, deaktivacija |
+| **Radnici** | `/radnici` | lista, dodavanje, izmena imena i boje iz palete, deaktivacija |
+| **Podešavanja** | `/podesavanja` | ime salona, početak nedelje, radno vreme po danu (validacija), email naloga, odjava |
+| **Statistika** | `/statistika` | promet/termini/klijenti/otkazivanja za dan · nedelju · mesec, stubići po danima, tabele po radniku i po usluzi |
+| **Nedeljni pregled** | — | ostalo za kasnije |
+
+Usput: `rsd` i `plural` Nunjucks filteri (srpska množina: 1 dolazak / 2 dolaska / 5 dolazaka),
+paleta boja radnika izdvojena u `src/lib/palette.ts`, bottom nav vodi na prave ekrane.
 
 ## Faza 4 — Početna strana (marketing) ✅ Isporučeno
 
@@ -129,7 +133,7 @@ health-check.
 1. ✅ Faza 1 — Mobile + PWA
 2. ✅ Faza 2 — Auth + registracija + onboarding
 3. ✅ Faza 4 — Početna strana
-4. Faza 3 — CRUD ekrani
+4. ✅ Faza 3 — CRUD ekrani (+ prvi deo statistike iz Faze 7)
 5. Faza 5 — Premium gating
 6. Faza 6 — Online zakazivanje
 7. Faza 7 — Statistika + podsetnici

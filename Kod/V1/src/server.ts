@@ -15,6 +15,11 @@ import { clientRoutes } from "./web/routes/clients.js";
 import { authRoutes, publicAuthRoutes } from "./web/routes/auth.js";
 import { onboardingRoutes } from "./web/routes/onboarding.js";
 import { marketingRoutes } from "./web/routes/marketing.js";
+import { catalogRoutes } from "./web/routes/catalog.js";
+import { settingsRoutes } from "./web/routes/settings.js";
+import { statsRoutes } from "./web/routes/stats.js";
+import { formatRsd } from "./lib/money.js";
+import { countLabel } from "./lib/plural.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const viewsDir = join(here, "web/views");
@@ -47,6 +52,12 @@ async function build() {
     options: {
       onConfigure: (env: nunjucks.Environment) => {
         env.addFilter("json", (v: unknown) => JSON.stringify(v));
+        // Cene su svuda u minor jedinicama (para) — prikaz ide kroz jedan filter.
+        env.addFilter("rsd", (v: unknown) => formatRsd(Number(v ?? 0)));
+        // {{ 3 | plural("dolazak", "dolaska", "dolazaka") }} -> "3 dolaska"
+        env.addFilter("plural", (v: unknown, one: string, few: string, many: string) =>
+          countLabel(Number(v ?? 0), one, few, many),
+        );
       },
     },
   });
@@ -76,6 +87,9 @@ async function build() {
       await scope.register(appointmentRoutes);
       await scope.register(clientRoutes);
       await scope.register(onboardingRoutes);
+      await scope.register(catalogRoutes);
+      await scope.register(settingsRoutes);
+      await scope.register(statsRoutes);
     },
     { prefix: "/s/:slug" },
   );

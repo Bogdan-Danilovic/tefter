@@ -1,0 +1,68 @@
+{% extends "layout.njk" %}
+{% block title %}Podešavanja · {{ salon.name }}{% endblock %}
+{% block content %}
+{% include "partials/page-head.njk" %}
+
+<main class="mx-auto w-full max-w-3xl px-4 pt-4"
+      style="padding-bottom: calc(6.5rem + env(safe-area-inset-bottom))">
+
+  {% if saved %}
+  <p class="mb-3 rounded-lg bg-line/60 px-3 py-2.5 text-sm text-muted">Sačuvano.</p>
+  {% endif %}
+  {% if error %}
+  <p class="mb-3 rounded-lg bg-now/10 px-3 py-2.5 text-sm text-now">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/s/{{ salon.slug }}/podesavanja" class="rounded-xl border border-line bg-surface p-4">
+    <h2 class="text-[15px] font-semibold">Salon</h2>
+    <div class="mt-3">
+      <label class="field-label" for="name">Ime salona</label>
+      <input class="field" id="name" name="name" value="{{ salon.name }}" required maxlength="80" />
+    </div>
+    <div class="mt-3">
+      <label class="field-label" for="weekStartDay">Nedelja počinje od</label>
+      <select class="field" id="weekStartDay" name="weekStartDay">
+        {% for d in weekdays %}
+        <option value="{{ d.n }}" {% if d.n == salon.weekStartDay %}selected{% endif %}>{{ d.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="mt-3 text-[13px] text-muted">
+      Adresa salona: <span class="font-medium text-ink">/s/{{ salon.slug }}</span> — ne menja se, jer bi svi sačuvani linkovi prestali da rade.
+    </p>
+    <button type="submit" class="btn btn-primary mt-4 w-full sm:w-auto">Sačuvaj</button>
+  </form>
+
+  <form method="post" action="/s/{{ salon.slug }}/podesavanja/radno-vreme"
+        class="mt-4 rounded-xl border border-line bg-surface p-4">
+    <h2 class="text-[15px] font-semibold">Radno vreme</h2>
+    <p class="mt-1 text-[13px] text-muted">Određuje raspon koji se vidi u dnevnom kalendaru.</p>
+    <div class="mt-3 flex flex-col gap-2">
+      {% for h in hours %}
+      <div class="flex items-center gap-2" x-data="{ closed: {{ 'true' if h.isClosed else 'false' }} }">
+        <span class="w-16 flex-none text-sm font-medium">{{ h.label }}</span>
+        <input class="field w-28 flex-none tabular-nums" type="time" name="open_{{ h.weekday }}"
+               value="{{ h.open }}" :disabled="closed" />
+        <span class="text-muted">–</span>
+        <input class="field w-28 flex-none tabular-nums" type="time" name="close_{{ h.weekday }}"
+               value="{{ h.close }}" :disabled="closed" />
+        <label class="ml-auto flex flex-none items-center gap-1.5 text-[13px] text-muted">
+          <input type="checkbox" name="closed_{{ h.weekday }}" value="1" class="h-5 w-5 rounded border-line"
+                 x-model="closed" />
+          ne radi
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary mt-4 w-full sm:w-auto">Sačuvaj radno vreme</button>
+  </form>
+
+  <div class="mt-4 rounded-xl border border-line bg-surface p-4">
+    <h2 class="text-[15px] font-semibold">Nalog</h2>
+    <p class="mt-1 text-[13px] text-muted">{{ accountEmail }}</p>
+    <form method="post" action="/s/{{ salon.slug }}/odjava" class="mt-3">
+      <button type="submit" class="btn btn-danger w-full sm:w-auto">Odjavi se</button>
+    </form>
+  </div>
+</main>
+{% endblock %}

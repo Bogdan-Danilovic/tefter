@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { packColumns } from "./layout.js";
 import { formatRsd, parseRsdToMinor } from "./money.js";
 import { slugCandidate, slugify } from "./slug.js";
+import { countLabel } from "./plural.js";
 import { openSession, parseCookieHeader, sealSession, type SessionPayload } from "./session.js";
 import {
   addDays,
@@ -95,6 +96,23 @@ describe("slug", () => {
     expect(slugCandidate("mari", 0)).toBe("mari");
     expect(slugCandidate("mari", 1)).toBe("mari-2");
     expect(slugCandidate("mari", 2)).toBe("mari-3");
+  });
+});
+
+describe("plural (srpska množina)", () => {
+  const dolazak = (n: number) => countLabel(n, "dolazak", "dolaska", "dolazaka");
+  it("1 / 2–4 / 5+", () => {
+    expect(dolazak(1)).toBe("1 dolazak");
+    expect(dolazak(3)).toBe("3 dolaska");
+    expect(dolazak(7)).toBe("7 dolazaka");
+    expect(dolazak(0)).toBe("0 dolazaka");
+  });
+  it("11–14 su izuzetak, 21/22 nisu", () => {
+    expect(dolazak(11)).toBe("11 dolazaka");
+    expect(dolazak(12)).toBe("12 dolazaka");
+    expect(dolazak(21)).toBe("21 dolazak");
+    expect(dolazak(22)).toBe("22 dolaska");
+    expect(dolazak(101)).toBe("101 dolazak");
   });
 });
 

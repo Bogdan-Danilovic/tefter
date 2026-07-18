@@ -1,0 +1,14 @@
+{# Zaglavlje pod-ekrana: naslov, opcioni "nazad" i slot za akciju desno. #}
+<header class="sticky top-0 z-30 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur">
+  <div class="mx-auto flex max-w-3xl items-center gap-2">
+    {% if backHref %}
+    <a href="{{ backHref }}" class="icon-btn -ml-2 flex-none" aria-label="Nazad">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+      {% if pageKicker %}<p class="truncate text-[13px] font-medium text-muted">{{ pageKicker }}</p>{% endif %}
+      <h1 class="truncate text-lg font-semibold tracking-tight">{{ pageTitle }}</h1>
+    </div>
+  </div>
+</header>

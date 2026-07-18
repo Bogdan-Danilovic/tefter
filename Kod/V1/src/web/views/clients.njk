@@ -1,0 +1,63 @@
+{% extends "layout.njk" %}
+{% block title %}Klijenti · {{ salon.name }}{% endblock %}
+{% block content %}
+{% include "partials/page-head.njk" %}
+
+<main class="mx-auto w-full max-w-3xl px-4 pt-4"
+      style="padding-bottom: calc(6.5rem + env(safe-area-inset-bottom))"
+      x-data="{ novi: false }">
+
+  <form method="get" action="/s/{{ salon.slug }}/klijenti" class="flex gap-2">
+    <input class="field" type="search" name="q" value="{{ q }}" placeholder="Pretraga po imenu ili telefonu"
+           inputmode="search" autocomplete="off" />
+    <button type="submit" class="btn btn-primary flex-none px-4">Traži</button>
+  </form>
+
+  <div class="mt-3 flex items-center justify-between">
+    <p class="text-[13px] text-muted">
+      {% if q %}Rezultata: {{ items|length }}{% else %}Ukupno: {{ items|length | plural("klijent", "klijenta", "klijenata") }}{% endif %}
+    </p>
+    <button type="button" class="btn btn-ghost text-[13px]" @click="novi = !novi">+ Novi klijent</button>
+  </div>
+
+  <form x-show="novi" x-cloak method="post" action="/s/{{ salon.slug }}/klijenti"
+        class="mt-2 rounded-xl border border-line bg-surface p-4" style="display:none">
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <div class="flex-1">
+        <label class="field-label" for="new-name">Ime i prezime</label>
+        <input class="field" id="new-name" name="fullName" required maxlength="80" />
+      </div>
+      <div class="flex-1">
+        <label class="field-label" for="new-phone">Telefon</label>
+        <input class="field" id="new-phone" name="phone" inputmode="tel" required maxlength="30" />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3 w-full sm:w-auto">Sačuvaj klijenta</button>
+  </form>
+
+  {% if error %}
+  <p class="mt-3 rounded-lg bg-now/10 px-3 py-2.5 text-sm text-now">{{ error }}</p>
+  {% endif %}
+
+  <ul class="mt-4 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+    {% for c in items %}
+    <li>
+      <a href="/s/{{ salon.slug }}/klijenti/{{ c.id }}" class="flex min-h-[56px] items-center gap-3 px-4 py-3 active:bg-line/40">
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-[15px] font-medium">{{ c.fullName }}</span>
+          <span class="block truncate text-[13px] text-muted tabular-nums">{{ c.phone }}</span>
+        </span>
+        <span class="flex-none text-right">
+          <span class="block text-[13px] font-medium tabular-nums">{{ c.spent | rsd }}</span>
+          <span class="block text-[12px] text-muted">{{ c.visits | plural("dolazak", "dolaska", "dolazaka") }}</span>
+        </span>
+      </a>
+    </li>
+    {% else %}
+    <li class="px-4 py-10 text-center text-sm text-muted">
+      {% if q %}Nema klijenta za „{{ q }}".{% else %}Još nema klijenata — dodaju se i kroz novi termin.{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}

@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  /* Alpine: sakrij dok se ne inicijalizuje (forme koje se otvaraju na klik). */
+  [x-cloak] {
+    display: none !important;
+  }
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;

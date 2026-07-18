@@ -11,6 +11,7 @@ import {
 } from "../../db/queries.js";
 import { hmToMinutes } from "../../lib/time.js";
 import { parseRsdToMinor } from "../../lib/money.js";
+import { STAFF_PALETTE } from "../../lib/palette.js";
 
 /**
  * Onboarding wizard u 3 koraka posle registracije:
@@ -20,18 +21,6 @@ import { parseRsdToMinor } from "../../lib/money.js";
  */
 
 const DAY_NAMES = ["Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota", "Nedelja"];
-
-/** Paleta boja za radnike (#94a3b8 je rezervisan za "Bilo ko"). */
-export const STAFF_PALETTE = [
-  "#f59e0b",
-  "#3b82f6",
-  "#10b981",
-  "#f43f5e",
-  "#8b5cf6",
-  "#06b6d4",
-  "#f97316",
-  "#84cc16",
-];
 
 const HM_RE = /^\d{2}:\d{2}$/;
 

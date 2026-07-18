@@ -8,7 +8,7 @@ async function renderDay(req: FastifyRequest, reply: FastifyReply, dateParam?: s
   const date = dateParam ?? isoDateInTz(salon.timezone);
   const day = await withTenant(salon.id, (tx) => buildDayContext(tx, salon, date));
   const template = req.headers["hx-request"] === "true" ? "partials/day-inner.njk" : "day.njk";
-  return reply.view(template, { day, salon });
+  return reply.view(template, { day, salon, tab: "day" });
 }
 
 export async function dayRoutes(app: FastifyInstance) {

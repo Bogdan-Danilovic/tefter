@@ -1,0 +1,74 @@
+{% extends "layout.njk" %}
+{% block title %}{{ client.fullName }} · {{ salon.name }}{% endblock %}
+{% block content %}
+{% include "partials/page-head.njk" %}
+
+<main class="mx-auto w-full max-w-3xl px-4 pt-4"
+      style="padding-bottom: calc(6.5rem + env(safe-area-inset-bottom))">
+
+  <div class="grid grid-cols-3 gap-2">
+    <div class="rounded-xl border border-line bg-surface px-3 py-3 text-center">
+      <p class="text-[11px] uppercase tracking-wide text-muted">Dolazaka</p>
+      <p class="mt-1 text-[19px] font-semibold tabular-nums">{{ stats.visits }}</p>
+    </div>
+    <div class="rounded-xl border border-line bg-surface px-3 py-3 text-center">
+      <p class="text-[11px] uppercase tracking-wide text-muted">Potrošeno</p>
+      <p class="mt-1 text-[19px] font-semibold tabular-nums">{{ stats.spent | rsd }}</p>
+    </div>
+    <div class="rounded-xl border border-line bg-surface px-3 py-3 text-center">
+      <p class="text-[11px] uppercase tracking-wide text-muted">Poslednji put</p>
+      <p class="mt-1 text-[15px] font-medium">{{ stats.lastVisit or "—" }}</p>
+    </div>
+  </div>
+
+  <div class="mt-3 flex gap-2">
+    <a href="tel:{{ client.phone }}" class="btn btn-primary h-12 flex-1 text-[15px] sm:h-12">Pozovi</a>
+    <a href="sms:{{ client.phone }}" class="btn h-12 flex-1 border border-line bg-surface text-[15px] sm:h-12">Pošalji SMS</a>
+  </div>
+
+  <form method="post" action="/s/{{ salon.slug }}/klijenti/{{ client.id }}"
+        class="mt-4 rounded-xl border border-line bg-surface p-4">
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <div class="flex-1">
+        <label class="field-label" for="fullName">Ime i prezime</label>
+        <input class="field" id="fullName" name="fullName" value="{{ client.fullName }}" required maxlength="80" />
+      </div>
+      <div class="flex-1">
+        <label class="field-label" for="phone">Telefon</label>
+        <input class="field" id="phone" name="phone" value="{{ client.phone }}" inputmode="tel" required maxlength="30" />
+      </div>
+    </div>
+    <div class="mt-3">
+      <label class="field-label" for="note">Beleška (formula boje, alergije, navike…)</label>
+      <textarea class="field h-24 py-2" id="note" name="note" rows="3">{{ client.note }}</textarea>
+    </div>
+    {% if error %}
+    <p class="mt-3 rounded-lg bg-now/10 px-3 py-2.5 text-sm text-now">{{ error }}</p>
+    {% endif %}
+    {% if saved %}
+    <p class="mt-3 rounded-lg bg-line/60 px-3 py-2.5 text-sm text-muted">Sačuvano.</p>
+    {% endif %}
+    <button type="submit" class="btn btn-primary mt-3 w-full sm:w-auto">Sačuvaj</button>
+  </form>
+
+  <h2 class="mt-6 text-[15px] font-semibold">Istorija termina</h2>
+  <ul class="mt-2 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+    {% for a in history %}
+    <li class="flex items-center gap-3 px-4 py-3 {% if a.status == 'cancelled' %}opacity-55{% endif %}">
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-[15px] {% if a.status == 'cancelled' %}line-through{% endif %}">{{ a.serviceName }}</span>
+        <span class="block truncate text-[13px] text-muted">{{ a.dateLabel }}{% if a.staffName %} · {{ a.staffName }}{% endif %}</span>
+      </span>
+      <span class="flex-none text-[14px] font-medium tabular-nums">{{ a.price | rsd }}</span>
+    </li>
+    {% else %}
+    <li class="px-4 py-8 text-center text-sm text-muted">Još nema termina.</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="/s/{{ salon.slug }}/klijenti/{{ client.id }}/obrisi" class="mt-6"
+        onsubmit="return confirm('Obrisati klijenta {{ client.fullName }}?')">
+    <button type="submit" class="btn btn-danger w-full">Obriši klijenta</button>
+  </form>
+</main>
+{% endblock %}
