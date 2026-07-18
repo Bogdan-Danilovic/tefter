@@ -10,6 +10,16 @@ type RegisterBody = { salonName?: string; email?: string; password?: string };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
+ * Preset nalozi na dnu login forme — samo van produkcije. Aplikacija ima jednu
+ * vrstu naloga (vlasnik salona, 1 po salonu); admin uloga još ne postoji.
+ * Kredencijali dolaze iz seed-a (src/db/seed.ts).
+ */
+const DEV_LOGIN_PRESETS =
+  process.env.NODE_ENV === "production"
+    ? null
+    : [{ label: "Demo salon (vlasnik)", email: "demo@tefter.local", password: "demo1234" }];
+
+/**
  * Rute pod /s/:slug BEZ requireAuth (prijava/odjava za konkretan salon).
  * resolveSalonHook je već postavio req.salon.
  */
@@ -23,6 +33,7 @@ export async function authRoutes(app: FastifyInstance) {
       salonName: req.salon.name,
       email: "",
       error: null,
+      presets: DEV_LOGIN_PRESETS,
     });
   });
 
@@ -36,6 +47,7 @@ export async function authRoutes(app: FastifyInstance) {
         salonName: req.salon.name,
         email,
         error: "Pogrešan email ili lozinka.",
+        presets: DEV_LOGIN_PRESETS,
       });
 
     if (!email || !password) return fail();
@@ -67,6 +79,7 @@ export async function publicAuthRoutes(app: FastifyInstance) {
       salonName: null,
       email: "",
       error: null,
+      presets: DEV_LOGIN_PRESETS,
     });
   });
 
@@ -80,6 +93,7 @@ export async function publicAuthRoutes(app: FastifyInstance) {
         salonName: null,
         email,
         error: "Pogrešan email ili lozinka.",
+        presets: DEV_LOGIN_PRESETS,
       });
 
     if (!email || !password) return fail();

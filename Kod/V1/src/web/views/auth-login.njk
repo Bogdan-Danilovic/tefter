@@ -34,5 +34,26 @@
     Nemaš nalog?
     <a href="/registracija" class="font-medium text-ink underline underline-offset-2">Registruj svoj salon</a>
   </p>
+
+  {% if presets %}
+  <div class="mt-10 border-t border-line pt-5">
+    <p class="mb-3 text-center text-xs font-medium uppercase tracking-wide text-muted">
+      Test nalozi (samo u razvoju)
+    </p>
+    <div class="flex flex-col gap-2">
+      {% for p in presets %}
+      <button type="button"
+              class="flex min-h-[44px] w-full items-center justify-between rounded-xl border border-line px-4 py-2.5 text-left active:bg-line/40"
+              onclick="document.getElementById('email').value='{{ p.email }}';document.getElementById('password').value='{{ p.password }}';document.querySelector('form').requestSubmit();">
+        <span>
+          <span class="block text-sm font-medium">{{ p.label }}</span>
+          <span class="block text-xs text-muted">{{ p.email }} · {{ p.password }}</span>
+        </span>
+        <span class="text-sm text-muted">Prijavi&nbsp;→</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
