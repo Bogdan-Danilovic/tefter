@@ -173,6 +173,7 @@ padu na Free (višak slika se samo ne prikazuje, tema se vrati na Klasičnu).
 
 | Korak | Sadržaj | Procena |
 |---|---|---|
+| **9.0 Dizajn demo** ✅ | `GET /sajt-demo` — tema „Noć" sa mock podacima (`site.njk`): aurora hero, marquee, scroll-reveal, cenovnik sa tačkastim vođicama, galerija, tim, radno vreme sa „danas", mobilni fiksni CTA. Sinhronizacija sa bazom = zamena izvora podataka. | ✅ |
 | **9.1 MVP** | migracija 0003, javna ruta + `site.njk` sa temom Klasična, editor bez slika (tema/boja/tekstovi/kontakt/publish), auto cenovnik + radno vreme, robots/sitemap izmena | 1,5 dan |
 | **9.2 Slike** | sharp pipeline, hero + galerija, upload/brisanje u editoru, `/uploads` statika | 1 dan |
 | **9.3 Teme + polish** | Moderna i Tamna tema, JSON-LD + OG, sekcija Tim, „Uredi sajt" dugme za vlasnika | 1 dan |

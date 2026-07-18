@@ -24,6 +24,7 @@
     <script type="application/ld+json">
       {{ jsonLd | safe }}
     </script>
+    {% block head %}{% endblock %}
   </head>
   <body class="min-h-screen">
     {% block content %}{% endblock %}
