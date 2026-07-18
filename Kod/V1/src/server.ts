@@ -14,6 +14,7 @@ import { appointmentRoutes } from "./web/routes/appointments.js";
 import { clientRoutes } from "./web/routes/clients.js";
 import { authRoutes, publicAuthRoutes } from "./web/routes/auth.js";
 import { onboardingRoutes } from "./web/routes/onboarding.js";
+import { marketingRoutes } from "./web/routes/marketing.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const viewsDir = join(here, "web/views");
@@ -79,10 +80,8 @@ async function build() {
     { prefix: "/s/:slug" },
   );
 
-  // Ulogovan → svoj kalendar; ostali → prijava. (Faza 4 ovde donosi landing.)
-  app.get("/", (req, reply) =>
-    reply.redirect(req.session ? `/s/${req.session.slug}/day` : "/prijava"),
-  );
+  // Početna strana (marketing) + robots/sitemap.
+  await app.register(marketingRoutes);
 
   return app;
 }

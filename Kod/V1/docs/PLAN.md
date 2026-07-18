@@ -1,7 +1,7 @@
 # Tefter — plan pune aplikacije
 
-> Status: Faza 1 (Mobile + PWA) i Faza 2 (Auth + registracija + onboarding) implementirane i
-> verifikovane (2026-07-18).
+> Status: Faza 1 (Mobile + PWA), Faza 2 (Auth + registracija + onboarding) i Faza 4 (Početna
+> strana) implementirane i verifikovane (2026-07-18).
 > Arhitektura je fiksna: Fastify + TypeScript, Nunjucks (server-side render), HTMX + Alpine.js
 > (NO React, NO JS build step), Tailwind CLI, PostgreSQL, Drizzle ORM, Zod, Vitest,
 > Docker Compose (app + Postgres + Caddy) na Hetzner VPS. Multi-tenant preko `salon_id` +
@@ -74,13 +74,18 @@ merenjem geometrije), swipe navigacija, service worker + manifest.
 | **Podešavanja** | radno vreme po danu, početak nedelje, ime salona, jezik/valuta kasnije |
 | **Nedeljni pregled** | kompaktni 7-dnevni grid (broj termina + zauzetost po danu), tap → dnevni prikaz |
 
-## Faza 4 — Početna strana (marketing)
+## Faza 4 — Početna strana (marketing) ✅ Isporučeno
 
-Isti monolit, iste Nunjucks/Tailwind estetike (premium, ne generički):
-
-- Hero ("Tefter — rokovnik tvog salona, u telefonu"), screenshot aplikacije, 3–4 feature sekcije,
-  **cenovnik**, CTA → registracija.
-- SEO osnove (meta, OG slike, sitemap), brzo — bez JS-a praktično.
+- `/` servira landing (`marketing.njk` layout bez app shell-a + `landing.njk`): hero sa mockup-om
+  telefona (čist HTML/CSS, bez slike), problem→rešenje blok, 4 feature kartice, Pro sekcija
+  (online zakazivanje), **cenovnik Free/Pro**, FAQ (5 pitanja), finalni CTA, footer.
+  Ulogovan korisnik u header-u dobija „Otvori aplikaciju" umesto CTA-ova.
+- Sadržaj (cena, feature liste, FAQ) živi u `src/web/routes/marketing.ts` — cena se menja
+  na jednom mestu (`PRICING.proMonthly`, trenutno **1.490 RSD/mes**).
+- SEO: title/description, canonical, OG + Twitter tagovi, JSON-LD `SoftwareApplication` sa
+  ponudama, `/robots.txt` (Disallow `/s/`) i `/sitemap.xml`.
+- Usput: service worker prebačen na stale-while-revalidate (cache `tefter-v2`) — ranije je
+  cache-first zauvek servirao staru `app.css`.
 
 ## Faza 5 — Premium model
 
@@ -123,7 +128,7 @@ health-check.
 
 1. ✅ Faza 1 — Mobile + PWA
 2. ✅ Faza 2 — Auth + registracija + onboarding
-3. Faza 4 — Početna strana
+3. ✅ Faza 4 — Početna strana
 4. Faza 3 — CRUD ekrani
 5. Faza 5 — Premium gating
 6. Faza 6 — Online zakazivanje

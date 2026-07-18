@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="sr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{% block title %}Tefter — rokovnik tvog salona, u telefonu{% endblock %}</title>
+    <meta name="description" content="{{ meta.description }}" />
+    <link rel="canonical" href="{{ meta.url }}" />
+    <link rel="stylesheet" href="/app.css" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tefter" />
+    <meta property="og:locale" content="sr_RS" />
+    <meta property="og:title" content="{{ meta.title }}" />
+    <meta property="og:description" content="{{ meta.description }}" />
+    <meta property="og:url" content="{{ meta.url }}" />
+    <meta property="og:image" content="{{ meta.origin }}/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#f5f4f1" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <script type="application/ld+json">
+      {{ jsonLd | safe }}
+    </script>
+  </head>
+  <body class="min-h-screen">
+    {% block content %}{% endblock %}
+  </body>
+</html>

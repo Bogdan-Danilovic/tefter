@@ -1,5 +1,5 @@
 // Tefter service worker — cache statike + offline fallback za navigacije.
-const CACHE = "tefter-v1";
+const CACHE = "tefter-v2";
 const STATIC = [
   "/app.css",
   "/app.js",
@@ -36,18 +36,20 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Statika: cache-first, u pozadini dopuni cache.
+  // Statika: stale-while-revalidate — odgovori odmah iz cache-a, ali uvek povuci
+  // svežu verziju u pozadini (inače nova app.css nikad ne stigne do telefona).
   if (STATIC.includes(url.pathname) || url.pathname.startsWith("/icons/")) {
     e.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
+      caches.match(req).then((hit) => {
+        const fresh = fetch(req)
+          .then((res) => {
             const copy = res.clone();
             caches.open(CACHE).then((c) => c.put(req, copy));
             return res;
-          }),
-      ),
+          })
+          .catch(() => hit);
+        return hit || fresh;
+      }),
     );
   }
 });
