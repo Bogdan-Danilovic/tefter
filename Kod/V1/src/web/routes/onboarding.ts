@@ -11,7 +11,7 @@ import {
 } from "../../db/queries.js";
 import { hmToMinutes } from "../../lib/time.js";
 import { parseRsdToMinor } from "../../lib/money.js";
-import { STAFF_PALETTE } from "../../lib/palette.js";
+import { SERVICE_PALETTE, STAFF_PALETTE } from "../../lib/palette.js";
 
 /**
  * Onboarding wizard u 3 koraka posle registracije:
@@ -145,7 +145,14 @@ export async function onboardingRoutes(app: FastifyInstance) {
         error = "Dodaj bar jednu uslugu — bez nje nema termina.";
       }
       if (error) return { existing };
-      await insertServices(tx, req.salon.id, items);
+      await insertServices(
+        tx,
+        req.salon.id,
+        items.map((item, i) => ({
+          ...item,
+          color: SERVICE_PALETTE[(existing.length + i) % SERVICE_PALETTE.length]!,
+        })),
+      );
       return null;
     });
 

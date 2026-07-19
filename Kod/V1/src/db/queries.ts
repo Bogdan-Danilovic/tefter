@@ -16,6 +16,7 @@ export type DayAppointment = {
   clientName: string | null;
   serviceId: string;
   serviceName: string;
+  serviceColor: string;
   staffId: string | null;
   staffName: string | null;
   staffColor: string | null;
@@ -31,6 +32,7 @@ const apptSelection = {
   clientName: clients.fullName,
   serviceId: appointments.serviceId,
   serviceName: services.name,
+  serviceColor: services.color,
   staffId: appointments.staffId,
   staffName: staff.fullName,
   staffColor: staff.color,
@@ -253,7 +255,7 @@ export async function replaceWorkingHours(tx: Tx, salonId: string, rows: Working
 export async function insertServices(
   tx: Tx,
   salonId: string,
-  items: { name: string; durationMin: number; priceMinor: number }[],
+  items: { name: string; durationMin: number; priceMinor: number; color: string }[],
 ) {
   if (items.length === 0) return;
   await tx.insert(services).values(
@@ -262,6 +264,7 @@ export async function insertServices(
       name: s.name,
       defaultDurationMin: s.durationMin,
       defaultPrice: s.priceMinor,
+      color: s.color,
     })),
   );
 }
@@ -358,7 +361,7 @@ export async function listServices(tx: Tx, salonId: string) {
 export async function createService(
   tx: Tx,
   salonId: string,
-  data: { name: string; defaultDurationMin: number; defaultPrice: number },
+  data: { name: string; defaultDurationMin: number; defaultPrice: number; color: string },
 ) {
   const [row] = await tx
     .insert(services)
@@ -371,7 +374,13 @@ export async function updateService(
   tx: Tx,
   salonId: string,
   id: string,
-  data: Partial<{ name: string; defaultDurationMin: number; defaultPrice: number; isActive: boolean }>,
+  data: Partial<{
+    name: string;
+    defaultDurationMin: number;
+    defaultPrice: number;
+    color: string;
+    isActive: boolean;
+  }>,
 ) {
   const [row] = await tx
     .update(services)
@@ -460,6 +469,7 @@ export async function statsByService(tx: Tx, salonId: string, start: Date, end: 
   return tx
     .select({
       name: services.name,
+      color: services.color,
       revenue: sql<number>`coalesce(sum(${appointments.price}), 0)::int`,
       done: count(appointments.id),
     })
@@ -472,7 +482,7 @@ export async function statsByService(tx: Tx, salonId: string, start: Date, end: 
         inRange(start, end),
       ),
     )
-    .groupBy(services.name)
+    .groupBy(services.name, services.color)
     .orderBy(desc(sql`coalesce(sum(${appointments.price}), 0)`));
 }
 

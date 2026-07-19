@@ -1,6 +1,6 @@
 import type { Salon } from "../db/schema.js";
 import type { Tx, DayAppointment } from "../db/queries.js";
-import { activeStaff, dayAppointments, workingHoursForWeekday } from "../db/queries.js";
+import { activeServices, dayAppointments, workingHoursForWeekday } from "../db/queries.js";
 import { packColumns } from "../lib/layout.js";
 import { formatRsd } from "../lib/money.js";
 import {
@@ -26,8 +26,8 @@ export type DayCard = {
   widthPct: number;
   clientName: string;
   serviceName: string;
+  serviceColor: string;
   staffName: string;
-  staffColor: string;
   timeLabel: string;
   priceLabel: string;
   hasNote: boolean;
@@ -61,11 +61,11 @@ export async function buildDayContext(tx: Tx, salon: Salon, date: string): Promi
   const tz = salon.timezone;
   const today = isoDateInTz(tz);
   const weekday = isoWeekday(date);
-  const [wh, staffRows] = await Promise.all([
+  const [wh, serviceRows] = await Promise.all([
     workingHoursForWeekday(tx, salon.id, weekday),
-    activeStaff(tx, salon.id),
+    activeServices(tx, salon.id),
   ]);
-  const legend = staffRows.map((s) => ({ name: s.fullName, color: s.color }));
+  const legend = serviceRows.map((s) => ({ name: s.name, color: s.color }));
 
   const base: Omit<DayContext, "closed" | "openMin" | "closeMin" | "gridHeightPx" | "hourLabels" | "slots" | "cards" | "showNow" | "nowTopPx" | "fabStart"> = {
     slug: salon.slug,
@@ -135,8 +135,8 @@ export async function buildDayContext(tx: Tx, salon: Salon, date: string): Promi
       widthPct,
       clientName: p.appt.clientName ?? "Bez klijenta",
       serviceName: p.appt.serviceName ?? "—",
+      serviceColor: p.appt.serviceColor ?? "#94a3b8",
       staffName: p.appt.staffName ?? "Bilo ko",
-      staffColor: p.appt.staffColor ?? "#94a3b8",
       timeLabel: `${minutesToHm(p.realStart)}–${minutesToHm(p.realEnd)}`,
       priceLabel: formatRsd(p.appt.price),
       hasNote: Boolean(p.appt.note && p.appt.note.trim()),

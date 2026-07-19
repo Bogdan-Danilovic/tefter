@@ -12,7 +12,9 @@
     <p class="field-label">Već dodato</p>
     <div class="flex flex-wrap gap-1.5">
       {% for e in existing %}
-      <span class="chip text-[13px]">{{ e.name }} · {{ e.defaultDurationMin }} min</span>
+      <span class="chip inline-flex items-center gap-1.5 text-[13px]">
+        <span class="h-2.5 w-2.5 flex-none rounded-full" style="background:{{ e.color }}"></span>{{ e.name }} · {{ e.defaultDurationMin }} min
+      </span>
       {% endfor %}
     </div>
   </div>

@@ -78,6 +78,7 @@
     <ul class="mt-2 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
       {% for r in byService %}
       <li class="flex items-center gap-3 px-4 py-3">
+        <span class="h-3 w-3 flex-none rounded-full" style="background:{{ r.color }}"></span>
         <span class="min-w-0 flex-1 truncate text-[15px]">{{ r.name }}</span>
         <span class="flex-none text-right">
           <span class="block text-[14px] font-medium tabular-nums">{{ r.revenue | rsd }}</span>

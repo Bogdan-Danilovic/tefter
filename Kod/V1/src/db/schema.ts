@@ -119,6 +119,7 @@ export const services = pgTable(
     name: text("name").notNull(),
     defaultDurationMin: integer("default_duration_min").notNull(),
     defaultPrice: integer("default_price").notNull(), // minor jedinice (para)
+    color: text("color").notNull().default("#94a3b8"),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

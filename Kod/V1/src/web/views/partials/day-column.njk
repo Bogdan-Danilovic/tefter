@@ -29,7 +29,7 @@
 
       {% for c in day.cards %}
         <button type="button" class="cal-card"
-          style="top: calc({{ c.topPx }}px * var(--zoom, 1)); height: calc({{ c.heightPx }}px * var(--zoom, 1)); left: calc({{ c.leftPct }}% + 2px); width: calc({{ c.widthPct }}% - 4px); --staff: {{ c.staffColor }}"
+          style="top: calc({{ c.topPx }}px * var(--zoom, 1)); height: calc({{ c.heightPx }}px * var(--zoom, 1)); left: calc({{ c.leftPct }}% + 2px); width: calc({{ c.widthPct }}% - 4px); --svc: {{ c.serviceColor }}"
           hx-get="/s/{{ day.slug }}/appointments/{{ c.id }}/edit"
           hx-target="#modal" hx-swap="innerHTML">
           <span class="cal-card-accent"></span>

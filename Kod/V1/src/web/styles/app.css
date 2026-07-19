@@ -86,8 +86,8 @@
   }
   .cal-card {
     @apply absolute z-10 flex overflow-hidden rounded-lg text-left shadow-card ring-1 ring-line transition;
-    /* blaga nijansa boje radnika da kartica ne bude prazna bela ploha */
-    background: color-mix(in srgb, var(--staff, theme("colors.muted")) 10%, theme("colors.surface"));
+    /* blaga nijansa boje usluge da kartica ne bude prazna bela ploha */
+    background: color-mix(in srgb, var(--svc, theme("colors.muted")) 10%, theme("colors.surface"));
     /* kartica je container da bi kratki termini automatski prešli na zbijen
        raspored (ime + vreme u istom redu) — i obrnuto kad se mreža zumira */
     container-type: size;
@@ -99,13 +99,13 @@
   .cal-card::after {
     content: "";
     @apply pointer-events-none absolute -bottom-6 -right-6 h-24 w-24 rounded-full;
-    background: var(--staff, theme("colors.muted"));
+    background: var(--svc, theme("colors.muted"));
     opacity: 0.14;
   }
   .cal-card-accent {
     @apply flex-none;
     width: 4px;
-    background: var(--staff, theme("colors.muted"));
+    background: var(--svc, theme("colors.muted"));
   }
   /* podrazumevano (kratke kartice): ime + vreme u istom redu, usluga ispod */
   .cal-card-body {

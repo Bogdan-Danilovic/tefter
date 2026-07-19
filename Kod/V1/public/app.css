@@ -832,8 +832,8 @@ body {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-  /* blaga nijansa boje radnika da kartica ne bude prazna bela ploha */
-  background: color-mix(in srgb, var(--staff, #6f6b64) 10%, #ffffff);
+  /* blaga nijansa boje usluge da kartica ne bude prazna bela ploha */
+  background: color-mix(in srgb, var(--svc, #6f6b64) 10%, #ffffff);
   /* kartica je container da bi kratki termini automatski prešli na zbijen
        raspored (ime + vreme u istom redu) — i obrnuto kad se mreža zumira */
   container-type: size;
@@ -854,14 +854,14 @@ body {
   height: 6rem;
   width: 6rem;
   border-radius: 9999px;
-  background: var(--staff, #6f6b64);
+  background: var(--svc, #6f6b64);
   opacity: 0.14;
 }
 
 .cal-card-accent {
   flex: none;
   width: 4px;
-  background: var(--staff, #6f6b64);
+  background: var(--svc, #6f6b64);
 }
 
 /* podrazumevano (kratke kartice): ime + vreme u istom redu, usluga ispod */

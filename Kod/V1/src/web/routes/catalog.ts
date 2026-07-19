@@ -9,9 +9,9 @@ import {
   updateStaffMember,
 } from "../../db/queries.js";
 import { parseRsdToMinor } from "../../lib/money.js";
-import { STAFF_PALETTE, safeStaffColor } from "../../lib/palette.js";
+import { SERVICE_PALETTE, STAFF_PALETTE, safeServiceColor, safeStaffColor } from "../../lib/palette.js";
 
-type ServiceBody = { name?: string; durationMin?: string; price?: string; isActive?: string };
+type ServiceBody = { name?: string; durationMin?: string; price?: string; color?: string; isActive?: string };
 type StaffBody = { fullName?: string; color?: string; isActive?: string };
 
 /** Usluge i radnici — katalog salona (Faza 3). */
@@ -31,6 +31,7 @@ export async function catalogRoutes(app: FastifyInstance) {
       backHref: `/s/${req.salon.slug}/day`,
       // priceInput = dinari, jer forma prima dinare a baza čuva pare.
       items: rows.map((s) => ({ ...s, priceInput: Math.round(s.defaultPrice / 100) })),
+      palette: SERVICE_PALETTE,
       error,
     });
   };
@@ -41,11 +42,12 @@ export async function catalogRoutes(app: FastifyInstance) {
     const name = (req.body?.name ?? "").trim();
     const durationMin = Number.parseInt(req.body?.durationMin ?? "", 10);
     const price = parseRsdToMinor(req.body?.price ?? "");
+    const color = safeServiceColor(req.body?.color);
     if (name.length < 2 || !Number.isFinite(durationMin) || durationMin <= 0 || price === null) {
       return renderServices(req, reply.code(422), "Proveri naziv, trajanje (u minutima) i cenu.");
     }
     await withTenant(req.salon.id, (tx) =>
-      createService(tx, req.salon.id, { name, defaultDurationMin: durationMin, defaultPrice: price }),
+      createService(tx, req.salon.id, { name, defaultDurationMin: durationMin, defaultPrice: price, color }),
     );
     return reply.redirect(`/s/${req.salon.slug}/usluge`, 303);
   });
@@ -54,6 +56,7 @@ export async function catalogRoutes(app: FastifyInstance) {
     const name = (req.body?.name ?? "").trim();
     const durationMin = Number.parseInt(req.body?.durationMin ?? "", 10);
     const price = parseRsdToMinor(req.body?.price ?? "");
+    const color = safeServiceColor(req.body?.color);
     if (name.length < 2 || !Number.isFinite(durationMin) || durationMin <= 0 || price === null) {
       return renderServices(req, reply.code(422), "Proveri naziv, trajanje (u minutima) i cenu.");
     }
@@ -62,6 +65,7 @@ export async function catalogRoutes(app: FastifyInstance) {
         name,
         defaultDurationMin: durationMin,
         defaultPrice: price,
+        color,
         isActive: req.body?.isActive === "1",
       }),
     );
