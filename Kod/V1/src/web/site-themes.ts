@@ -273,6 +273,119 @@ export const SITE_THEMES: Record<string, SiteTheme> = {
     grain: 0.22,
     aurora: ["rgba(196,148,32,0.2)", "rgba(214,120,60,0.16)", "rgba(160,120,40,0.12)"],
   },
+  /* ------------------------------------------------------------------
+     Pastelna kolekcija — meke, svetle teme za kozmetičke i frizerske
+     salone: puno vazduha, niska zrnavost, veliki radiusi, nežne aurore.
+     Brand je namerno zatamnjen do AA — "pastelnost" nose bg/surface/aurore.
+     ------------------------------------------------------------------ */
+
+  // Puder roze + topla bela, prašnjava ruža. Svetlije i mekše od "ruz"
+  // (tamo je saturirana duboka ruža na skoro beloj podlozi). Aurora:
+  // ruža, puder i dah jorgovana — jedva vidljivi.
+  puder: {
+    key: "puder",
+    label: "Puder",
+    scheme: "light",
+    bg: "#f8e8e8",
+    surface: "#fffafa",
+    ink: "#43272e",
+    muted: "rgba(67,39,46,0.7)",
+    line: "rgba(67,39,46,0.12)",
+    brand: "#a04f62",
+    brandInk: "#fff7f6",
+    display: SERIF,
+    displayWeight: 400,
+    displayTracking: "-0.005em",
+    radius: "1.7rem",
+    grain: 0.12,
+    aurora: ["rgba(160,79,98,0.12)", "rgba(244,187,187,0.16)", "rgba(214,186,224,0.12)"],
+  },
+
+  // Spa mir: sage zelena + krem, prigušena maslinasto-zelena kao akcenat.
+  // Jedina zelena svetla tema (smaragd je taman). Aurora: sage, krem, list.
+  eukaliptus: {
+    key: "eukaliptus",
+    label: "Eukaliptus",
+    scheme: "light",
+    bg: "#edf1e6",
+    surface: "#f9fbf3",
+    ink: "#232d24",
+    muted: "rgba(35,45,36,0.7)",
+    line: "rgba(35,45,36,0.12)",
+    brand: "#4a6b53",
+    brandInk: "#f1f6ec",
+    display: SERIF,
+    displayWeight: 400,
+    displayTracking: "-0.005em",
+    radius: "1.4rem",
+    grain: 0.12,
+    aurora: ["rgba(122,152,118,0.16)", "rgba(214,222,178,0.16)", "rgba(150,180,150,0.1)"],
+  },
+
+  // Kajsija/breskva + krem, topla koralna. Pinkija i svetlija od "terakote"
+  // (tamo pesak + cigla); življa od "puder" roze. Aurora: breskva, koral, med.
+  breskva: {
+    key: "breskva",
+    label: "Breskva",
+    scheme: "light",
+    bg: "#fdecdd",
+    surface: "#fff8f0",
+    ink: "#3f2a1d",
+    muted: "rgba(63,42,29,0.7)",
+    line: "rgba(63,42,29,0.12)",
+    brand: "#ab4640",
+    brandInk: "#fff3ec",
+    display: SERIF,
+    displayWeight: 400,
+    displayTracking: "-0.005em",
+    radius: "1.5rem",
+    grain: 0.12,
+    aurora: ["rgba(240,150,110,0.16)", "rgba(255,190,150,0.16)", "rgba(230,170,190,0.1)"],
+  },
+
+  // Mlečna kafa: krem-bež tonovi + karamel braon, mek sans — toplo i domaće.
+  // Neutralnije od "terakote" (bez crvenog) i mirnije od "retro" senfa.
+  // Aurora: karamel, mleko, cimet.
+  latte: {
+    key: "latte",
+    label: "Latte",
+    scheme: "light",
+    bg: "#f2ebe1",
+    surface: "#fbf7f0",
+    ink: "#35291d",
+    muted: "rgba(53,41,29,0.7)",
+    line: "rgba(53,41,29,0.12)",
+    brand: "#8a5c2e",
+    brandInk: "#fdf7ed",
+    display: SANS,
+    displayWeight: 600,
+    displayTracking: "-0.02em",
+    radius: "1.6rem",
+    grain: 0.14,
+    aurora: ["rgba(180,130,70,0.14)", "rgba(236,214,180,0.17)", "rgba(170,120,90,0.1)"],
+  },
+
+  // Sveže i čisto: vrlo svetla plavo-siva + prašnjava plava. Smirenije od
+  // "moderne" (tamo živ indigo na čisto belom). Aurora: prašnjava plava,
+  // nebo, dah mente.
+  nebo: {
+    key: "nebo",
+    label: "Nebo",
+    scheme: "light",
+    bg: "#edf1f6",
+    surface: "#ffffff",
+    ink: "#26303d",
+    muted: "rgba(38,48,61,0.7)",
+    line: "rgba(38,48,61,0.12)",
+    brand: "#44688a",
+    brandInk: "#f2f7fc",
+    display: SANS,
+    displayWeight: 600,
+    displayTracking: "-0.02em",
+    radius: "1.3rem",
+    grain: 0.1,
+    aurora: ["rgba(100,140,180,0.14)", "rgba(170,200,230,0.16)", "rgba(150,200,190,0.1)"],
+  },
 };
 
 export const DEFAULT_THEME = "noc";

@@ -1,0 +1,273 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Album": foto-prvo, kao Instagram feed / scrapbook — polaroid
+     kartice sa blagim rotacijama koje se na hover isprave, cenovnik i
+     radno vreme kao "zalepljeni" stikeri, Instagram CTA u prvom planu.
+
+     Polaroid okvir je NAMERNO uvek beo sa tamnosivim natpisom (#fff /
+     #4a4a4a) — to je hrom fotografije kao i overlay na .st-tile, papir
+     polaroida ne menja boju sa temom. Sve ostalo su --s-*/--brand tokeni.
+     ==================================================================== */
+  .al-wrap { max-width: 66rem; margin-inline: auto; padding-inline: 1.25rem; }
+  .al-section { padding-block: 4rem; }
+  .al-h2 { font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.1; }
+  .al-h2 em { font-style: italic; color: var(--brand); }
+
+  /* --- navigacija --------------------------------------------------------- */
+  .al-nav {
+    position: fixed; inset-inline: 0; top: var(--demo-offset, 0); z-index: 50;
+    border-bottom: 1px solid transparent;
+    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  .al-nav.scrolled { background: color-mix(in srgb, var(--s-bg) 82%, transparent); backdrop-filter: blur(12px); border-color: var(--s-line); }
+
+  /* --- polaroid ------------------------------------------------------------ */
+  .al-pol {
+    background: #fff; padding: 0.8rem 0.8rem 0.6rem; margin: 0;
+    box-shadow: 0 20px 50px -25px rgba(0, 0, 0, 0.45);
+    transform: rotate(var(--rot, 0deg));
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s;
+  }
+  .al-pol:hover { transform: rotate(0) translateY(-6px); box-shadow: 0 30px 65px -28px rgba(0, 0, 0, 0.5); }
+  .al-pol-art { position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
+  .al-pol-art > div { position: absolute; inset: -8%; }
+  .al-pol-cap { padding: 0.7rem 0.2rem 0.5rem; text-align: center; font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 14px; color: #4a4a4a; }
+
+  /* traka lepljive trake preko gornje ivice */
+  .al-tape {
+    position: absolute; top: -0.8rem; left: 50%; width: 6.5rem; height: 1.6rem; z-index: 2;
+    transform: translateX(-50%) rotate(var(--tape-rot, -3deg));
+    background: color-mix(in srgb, var(--brand) 26%, transparent);
+    backdrop-filter: blur(1px); border-inline: 1px dashed color-mix(in srgb, var(--brand) 35%, transparent);
+  }
+
+  /* --- hero: velika polaroid fotografija ---------------------------------- */
+  .al-hero { padding: calc(var(--demo-offset, 0px) + 7rem) 1.25rem 4rem; text-align: center; position: relative; overflow: clip; }
+  .al-hero-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(70% 55% at 50% 10%, var(--s-aurora1), transparent 70%); }
+  .al-hero-pols { position: relative; width: min(24rem, 84vw); margin: 2.6rem auto 0; }
+  .al-hero-pol { --rot: -2deg; position: relative; z-index: 1; }
+  .al-hero-pol .al-pol-art { aspect-ratio: 4 / 3; }
+  .al-hero-back { --rot: 4deg; position: absolute; inset: 0; z-index: 0; transform: rotate(4deg) translate(6%, -4%); }
+  .al-hero-name {
+    position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: clamp(1.9rem, 7vw, 2.9rem);
+    color: rgba(255, 255, 255, 0.96); text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55); /* natpis preko "fotografije" — foto hrom */
+  }
+  .al-fade { opacity: 0; transform: translateY(14px); animation: al-fade 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: var(--d, 0s); }
+  @keyframes al-fade { to { opacity: 1; transform: none; } }
+
+  /* --- stiker kartice (cenovnik, radno vreme) ------------------------------ */
+  .al-sticker {
+    position: relative; background: color-mix(in srgb, var(--brand) 6%, var(--s-surface));
+    border: 1px solid var(--s-line); border-radius: var(--s-radius); padding: 1.8rem 1.6rem;
+    box-shadow: 0 22px 55px -35px rgba(0, 0, 0, 0.4);
+    transform: rotate(var(--rot, 0deg));
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .al-sticker:hover { transform: rotate(0); }
+  .al-price-row { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.75rem 0; border-bottom: 1px dashed var(--s-line); }
+  .al-price-row:last-child { border-bottom: 0; }
+  .al-price-dots { flex: 1; }
+  .al-price-val { font-variant-numeric: tabular-nums; font-size: 15px; }
+  .al-price-row:hover .al-price-val { color: var(--brand); }
+  .al-hours-row { display: flex; justify-content: space-between; gap: 0.8rem; padding: 0.5rem 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .al-hours-row.today { color: var(--brand); font-weight: 600; }
+
+  /* --- album mreža galerije ------------------------------------------------ */
+  .al-grid { display: grid; gap: 1.8rem 1.2rem; grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 768px) { .al-grid { grid-template-columns: repeat(3, 1fr); gap: 2.4rem 1.8rem; } }
+  .al-grid .al-pol:nth-child(4n + 1) { --rot: -2deg; }
+  .al-grid .al-pol:nth-child(4n + 2) { --rot: 1.5deg; }
+  .al-grid .al-pol:nth-child(4n + 3) { --rot: -1deg; }
+  .al-grid .al-pol:nth-child(4n) { --rot: 2deg; }
+
+  /* --- tim: mini polaroidi -------------------------------------------------- */
+  .al-team { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.8rem; }
+  .al-team .al-pol { width: min(11.5rem, 42vw); }
+  .al-team .al-pol-art { display: flex; align-items: center; justify-content: center; }
+  .al-team .al-init { font-family: var(--s-display); font-size: 2.6rem; color: #14110d; /* ink na pastelnoj boji radnika (podatak, ne tema) */ }
+  .al-team .al-pol:nth-child(odd) { --rot: -2deg; }
+  .al-team .al-pol:nth-child(even) { --rot: 1.8deg; }
+
+  /* --- Instagram traka ------------------------------------------------------ */
+  .al-insta {
+    text-align: center; background: color-mix(in srgb, var(--brand) 8%, var(--s-surface));
+    border-block: 1px solid var(--s-line); padding-block: 3.6rem;
+  }
+
+  .al-phone { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(2rem, 6vw, 3.2rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
+  .al-phone:hover { color: var(--brand); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .al-fade { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <!-- Navigacija -->
+  <nav class="al-nav" data-nav>
+    <div class="al-wrap" style="display:flex;align-items:center;justify-content:space-between;height:4.25rem">
+      <a href="#vrh" style="text-decoration:none;color:inherit">
+        <span class="st-serif" style="font-size:17px">{{ site.name }}</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <a class="st-btn st-btn-ghost" style="height:2.75rem;padding-inline:1.1rem;font-size:13px" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>
+        <a class="st-btn st-btn-gold st-btn-shine" style="height:2.75rem;padding-inline:1.2rem;font-size:13px" href="tel:{{ site.phoneRaw }}">Zakaži</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero: polaroid naslovnica -->
+  <header class="al-hero" id="vrh" data-hero>
+    <div class="al-hero-glow" aria-hidden="true"></div>
+    <p class="st-kicker al-fade" style="position:relative">{{ site.tagline }}</p>
+    <h1 class="st-serif al-h2 al-fade" style="--d:.1s;position:relative;margin-top:1rem;font-size:clamp(2.1rem,6vw,3.4rem)">Naš rad najbolje pričaju <em>fotografije.</em></h1>
+    <div class="al-hero-pols al-fade" style="--d:.25s">
+      <figure class="al-pol al-hero-back" aria-hidden="true">
+        <div class="al-pol-art"><div style="background:{{ gallery[1].art }}"></div></div>
+      </figure>
+      <figure class="al-pol al-hero-pol">
+        <span class="al-tape" aria-hidden="true"></span>
+        <div class="al-pol-art">
+          <div style="background:{{ gallery[0].art }}"></div>
+          <span class="al-hero-name st-serif">{{ site.name }}</span>
+        </div>
+        <figcaption class="al-pol-cap">{{ site.city }} · {{ gallery[0].label }}</figcaption>
+      </figure>
+    </div>
+    <div class="al-fade" style="--d:.4s;position:relative;margin-top:2.6rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+      <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+      <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+    </div>
+  </header>
+
+  <!-- O nama -->
+  <section class="al-section" id="onama">
+    <div class="al-wrap" style="text-align:center;max-width:42rem">
+      <p class="st-kicker rev">O nama</p>
+      <h2 class="st-serif al-h2 rev" style="margin-top:1rem">Zanat star koliko i lepota. <em>Pristup — nov.</em></h2>
+      <p class="rev" style="margin-top:1.4rem;color:var(--s-muted);font-size:16px;line-height:1.75">{{ site.aboutLong }}</p>
+      <div style="margin-top:2.2rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.6rem">
+        {% for f in site.facts %}
+        <div class="rev" style="--d:{{ loop.index0 * 0.12 }}s">
+          <p class="st-serif" style="font-size:1.9rem;color:var(--brand)">{{ f.n }}</p>
+          <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s-muted);margin-top:.2rem">{{ f.label }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cenovnik + radno vreme: stikeri -->
+  <section class="al-section" id="cenovnik" style="padding-top:1rem">
+    <div class="al-wrap" style="display:grid;gap:2.4rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));align-items:start">
+      <div class="al-sticker rev" style="--rot:-1deg">
+        <span class="al-tape" aria-hidden="true"></span>
+        <p class="st-kicker">Cenovnik</p>
+        <div style="margin-top:.9rem">
+          {% for s in services %}
+          <div class="al-price-row">
+            <div>
+              <p style="font-size:15px">{{ s.name }}</p>
+              <p style="font-size:11px;color:var(--s-muted)">{{ s.durationMin }} min</p>
+            </div>
+            <span class="al-price-dots" aria-hidden="true"></span>
+            <span class="al-price-val">{{ s.price }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="al-sticker rev" style="--rot:1.2deg;--d:.1s;--tape-rot:2deg">
+        <span class="al-tape" aria-hidden="true"></span>
+        <p class="st-kicker">Radno vreme</p>
+        <div style="margin-top:.9rem">
+          {% for h in hours %}
+          <div class="al-hours-row {% if h.today %}today{% endif %}">
+            <span>{{ h.label }}</span>
+            <span style="{% if not h.open %}color:var(--s-muted){% endif %}">{{ h.time }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Galerija: album polaroida -->
+  <section class="al-section" id="galerija">
+    <div class="al-wrap">
+      <div style="text-align:center">
+        <p class="st-kicker rev">Galerija</p>
+        <h2 class="st-serif al-h2 rev" style="margin-top:1rem">Iz našeg albuma.</h2>
+      </div>
+      <div class="al-grid" style="margin-top:2.6rem">
+        {% for g in gallery %}
+        <figure class="al-pol rev" style="--d:{{ loop.index0 * 0.08 }}s">
+          <div class="al-pol-art"><div style="background:{{ g.art }}"></div></div>
+          <figcaption class="al-pol-cap">{{ g.label }}</figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Instagram CTA -->
+  <section class="al-insta">
+    <div class="al-wrap">
+      <p class="st-kicker rev">Instagram</p>
+      <h2 class="st-serif al-h2 rev" style="margin-top:1rem">Novi radovi — <em>svakog dana.</em></h2>
+      <p class="rev" style="margin-top:1rem;color:var(--s-muted);font-size:15px">Zaprati nas i javi se porukom — najbrže odgovaramo na Instagramu.</p>
+      <a class="st-btn st-btn-gold st-btn-shine rev" style="margin-top:1.8rem" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+    </div>
+  </section>
+
+  <!-- Tim: mini polaroidi -->
+  <section class="al-section" id="tim">
+    <div class="al-wrap" style="text-align:center">
+      <p class="st-kicker rev">Tim</p>
+      <h2 class="st-serif al-h2 rev" style="margin-top:1rem">Ruke od poverenja.</h2>
+      <div class="al-team" style="margin-top:2.4rem">
+        {% for m in staff %}
+        <figure class="al-pol rev" style="--d:{{ loop.index0 * 0.1 }}s">
+          <div class="al-pol-art" style="background:{{ m.color }}">
+            <span class="al-init st-serif">{{ m.initials }}</span>
+          </div>
+          <figcaption class="al-pol-cap">{{ m.name }} · {{ m.role }}</figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Kontakt -->
+  <section class="al-section" id="kontakt" style="text-align:center;padding-bottom:3rem">
+    <div class="al-wrap">
+      <p class="st-kicker rev">Kontakt</p>
+      <h2 class="st-serif al-h2 rev" style="margin-top:1rem">Vidimo se <em>u salonu.</em></h2>
+      <a class="al-phone rev" style="display:inline-block;margin-top:1.2rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+      <p class="rev" style="margin-top:.8rem;color:var(--s-muted);font-size:14px">
+        <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+      </p>
+      <div class="rev" style="margin-top:1.8rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+        <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Pozovi salon</a>
+        <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+      </div>
+    </div>
+  </section>
+
+  {{ shared.footer(site, year) }}
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+{% endblock %}

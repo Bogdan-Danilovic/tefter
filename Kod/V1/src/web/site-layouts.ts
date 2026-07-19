@@ -32,6 +32,14 @@ export const SITE_LAYOUTS: Record<string, SiteLayout> = {
 
   // Svaka sekcija pun ekran sa scroll-snap i tačkastom navigacijom sa strane.
   cinema: { key: "cinema", label: "Cinema", template: "cinema.njk" },
+
+  // Organski i prozračan za beauty salone: talasasti prelazi između sekcija,
+  // galerija kao "latice", mekane kartice — ništa nije pravougaono.
+  svila: { key: "svila", label: "Svila", template: "svila.njk" },
+
+  // Foto-prvo kao album/scrapbook: polaroid kartice sa blagim rotacijama,
+  // cenovnik i radno vreme kao stikeri, Instagram u prvom planu.
+  album: { key: "album", label: "Album", template: "album.njk" },
 };
 
 export const DEFAULT_LAYOUT = "aurora";
