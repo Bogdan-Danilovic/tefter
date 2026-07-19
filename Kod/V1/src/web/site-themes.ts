@@ -164,6 +164,115 @@ export const SITE_THEMES: Record<string, SiteTheme> = {
     grain: 0.16,
     aurora: ["rgba(20,20,20,0.05)", "rgba(20,20,20,0.035)", "rgba(20,20,20,0.045)"],
   },
+
+  // Noćni cyber barbershop: hladna crno-plava + JEDAN električni cijan, zbijen
+  // sans, male ivice. Aurora: neonski odsjaj — cijan, elektro-plava, dah magente.
+  neon: {
+    key: "neon",
+    label: "Neon",
+    scheme: "dark",
+    bg: "#08090d",
+    surface: "#10131a",
+    ink: "#edf1f7",
+    muted: "rgba(237,241,247,0.62)",
+    line: "rgba(237,241,247,0.11)",
+    brand: "#22d3ee",
+    brandInk: "#06181d",
+    display: SANS,
+    displayWeight: 700,
+    displayTracking: "-0.03em",
+    radius: "0.35rem",
+    grain: 0.42,
+    aurora: ["rgba(34,211,238,0.2)", "rgba(59,130,246,0.16)", "rgba(217,70,239,0.12)"],
+  },
+
+  // Mediteran: topao pesak + terakota, serif — sunčano i zemljano. Saturiranije
+  // i toplije od "klasicne" (tamo je slonovača + vinski bordo). Aurora: terakota,
+  // maslina, sunčevo zlato.
+  terakota: {
+    key: "terakota",
+    label: "Terakota",
+    scheme: "light",
+    bg: "#f6ead8",
+    surface: "#fdf6ea",
+    ink: "#2b2118",
+    muted: "rgba(43,33,24,0.68)",
+    line: "rgba(43,33,24,0.15)",
+    brand: "#a2402a",
+    brandInk: "#fdf2e7",
+    display: SERIF,
+    displayWeight: 400,
+    displayTracking: "-0.005em",
+    radius: "0.85rem",
+    grain: 0.2,
+    aurora: ["rgba(162,64,42,0.16)", "rgba(128,128,52,0.16)", "rgba(224,164,80,0.2)"],
+  },
+
+  // Butik hotel: duboka teget + bakar, serif. Hladna plava baza — namerno drugačije
+  // od tople crne "noći", a bakar je narandžastiji od njenog šampanja. Aurora:
+  // bakar + duboko more + mesečina.
+  lazur: {
+    key: "lazur",
+    label: "Lazur",
+    scheme: "dark",
+    bg: "#0a1424",
+    surface: "#101c30",
+    ink: "#eef2f7",
+    muted: "rgba(238,242,247,0.62)",
+    line: "rgba(238,242,247,0.11)",
+    brand: "#d08b52",
+    brandInk: "#1c1006",
+    display: SERIF,
+    displayWeight: 400,
+    displayTracking: "-0.01em",
+    radius: "0.8rem",
+    grain: 0.45,
+    aurora: ["rgba(208,139,82,0.24)", "rgba(59,130,246,0.14)", "rgba(148,190,255,0.1)"],
+  },
+
+  // Sanjivo: pastel lila + duboka ljubičasta, mek sans, najveći radiusi.
+  // Ljubičasti spektar (ne rozi kao "ruz"); violet je crveniji od indiga "moderne",
+  // a pozadina tonirana, ne bela. Aurora: violet, lila, ružičasti sumrak.
+  lavanda: {
+    key: "lavanda",
+    label: "Lavanda",
+    scheme: "light",
+    bg: "#f4effc",
+    surface: "#ffffff",
+    ink: "#2b2140",
+    muted: "rgba(43,33,64,0.68)",
+    line: "rgba(43,33,64,0.12)",
+    brand: "#6d28d9",
+    brandInk: "#ffffff",
+    display: SANS,
+    displayWeight: 700,
+    displayTracking: "-0.03em",
+    radius: "1.6rem",
+    grain: 0.14,
+    aurora: ["rgba(109,40,217,0.14)", "rgba(167,139,250,0.18)", "rgba(236,153,246,0.12)"],
+  },
+
+  // Sedamdesete: ecru + duboki senf, DEBEO serif (jedini bold serif u paleti) —
+  // "spaljeni" editorial karakter. Aurora: izbledele sunčeve mrlje — senf,
+  // spaljena narandža, staro zlato.
+  retro: {
+    key: "retro",
+    label: "Retro",
+    scheme: "light",
+    bg: "#f4eeda",
+    surface: "#fcf7e8",
+    ink: "#2a2416",
+    muted: "rgba(42,36,22,0.68)",
+    line: "rgba(42,36,22,0.14)",
+    brand: "#7d5f00",
+    brandInk: "#fdf8e4",
+    display: SERIF,
+    displayWeight: 700,
+    displayTracking: "-0.02em",
+    radius: "1rem",
+    grain: 0.22,
+    aurora: ["rgba(196,148,32,0.2)", "rgba(214,120,60,0.16)", "rgba(160,120,40,0.12)"],
+  },
 };
 
 export const DEFAULT_THEME = "noc";
