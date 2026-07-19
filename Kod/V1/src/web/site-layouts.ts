@@ -40,6 +40,22 @@ export const SITE_LAYOUTS: Record<string, SiteLayout> = {
   // Foto-prvo kao album/scrapbook: polaroid kartice sa blagim rotacijama,
   // cenovnik i radno vreme kao stikeri, Instagram u prvom planu.
   album: { key: "album", label: "Album", template: "album.njk" },
+
+  // Elegancija ogledala i lukova: svaka fotografija je prozor sa polukružnim
+  // vrhom, romb ornamenti, cenovnik kao jelovnik sa tačkastim vođicama.
+  arkada: { key: "arkada", label: "Arkada", template: "arkada.njk" },
+
+  // Sajt kao svečana pozivnica: sekcije su "listovi" sa dvostrukim okvirom,
+  // monogram i pečat, kaligrafski zavijuci, potpis na kraju.
+  pismo: { key: "pismo", label: "Pismo", template: "pismo.njk" },
+
+  // Cvetno i razigrano: čipkaste (skalop) ivice između sekcija, cvetići u
+  // hero-u, galerija u ovalnim ramovima sa tačkastim vencem.
+  buket: { key: "buket", label: "Buket", template: "buket.njk" },
+
+  // Spa jutro: sunce koje izlazi u hero-u, svetlosne kugle koje dišu, ritual
+  // u tri koraka, cenovnik i radno vreme na plutajućim ostrvima.
+  ritual: { key: "ritual", label: "Ritual", template: "ritual.njk" },
 };
 
 export const DEFAULT_LAYOUT = "aurora";

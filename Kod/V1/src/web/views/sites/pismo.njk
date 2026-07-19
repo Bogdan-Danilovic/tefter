@@ -1,0 +1,231 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{# Kaligrafski zavijutak ispod naslova — potpis "pisma". #}
+{% macro flourish() %}
+<svg class="pi-flour" viewBox="0 0 120 14" aria-hidden="true"><path d="M4 7 C 28 -3, 46 17, 70 7 S 108 1, 116 7" stroke="currentColor" fill="none" stroke-width="1.1" stroke-linecap="round"/></svg>
+{% endmacro %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Pismo": sajt kao svečana pozivnica — svaka sekcija je "list"
+     sa dvostrukim tankim okvirom, monogram, kaligrafski zavijuci,
+     cenovnik kao meni sa tačkastim vođicama, potpis na kraju. Za salone
+     koji žele intiman, rukom pisan ton.
+     ==================================================================== */
+  .pi-main { padding: calc(var(--demo-offset, 0px) + 6.5rem) 1.25rem 4rem; position: relative; }
+  .pi-main::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(45% 30% at 0% 0%, var(--s-aurora2), transparent 70%),
+      radial-gradient(45% 30% at 100% 100%, var(--s-aurora3), transparent 70%);
+  }
+  .pi-sheet {
+    position: relative; background: var(--s-surface); border: 1px solid var(--s-line);
+    border-radius: calc(var(--s-radius) * 0.25); max-width: 46rem; margin-inline: auto;
+    padding: 3rem clamp(1.3rem, 5vw, 3rem); text-align: center;
+    box-shadow: 0 24px 60px -40px rgba(0, 0, 0, 0.35);
+  }
+  .pi-sheet::after { content: ""; position: absolute; inset: 0.55rem; border: 1px solid var(--s-line); border-radius: inherit; pointer-events: none; }
+  .pi-sheet + .pi-sheet { margin-top: 2.6rem; }
+  .pi-h { font-size: clamp(1.8rem, 4.5vw, 2.6rem); line-height: 1.15; }
+  .pi-h em, .pi-h1 em { font-style: italic; color: var(--brand); }
+  .pi-flour { display: block; width: 7rem; margin: 1.3rem auto 0; color: var(--brand); opacity: 0.8; }
+
+  /* monogram i "vosak" pečat */
+  .pi-mono {
+    width: 3.7rem; height: 3.7rem; margin-inline: auto; border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--brand) 55%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--s-display); font-size: 1.6rem; color: var(--brand);
+  }
+  .pi-seal {
+    position: absolute; top: -1.15rem; right: clamp(0.9rem, 5vw, 2.2rem); z-index: 1;
+    width: 3.4rem; height: 3.4rem; border-radius: 9999px; transform: rotate(-8deg);
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--brand) 78%, #fff), var(--brand));
+    color: var(--brand-ink); font-family: var(--s-display); font-size: 1.3rem;
+    box-shadow: 0 10px 25px -12px color-mix(in srgb, var(--brand) 70%, transparent);
+  }
+
+  /* --- navigacija --------------------------------------------------------- */
+  .pi-nav {
+    position: fixed; inset-inline: 0; top: var(--demo-offset, 0); z-index: 50;
+    border-bottom: 1px solid transparent;
+    transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  .pi-nav.scrolled { background: color-mix(in srgb, var(--s-bg) 84%, transparent); backdrop-filter: blur(12px); border-color: var(--s-line); }
+
+  /* --- meni sa tačkastim vođicama (cenovnik + radno vreme) ----------------- */
+  .pi-menu { max-width: 32rem; margin-inline: auto; text-align: left; }
+  .pi-row { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.8rem 0; }
+  .pi-dots { flex: 1; border-bottom: 1px dotted color-mix(in srgb, var(--s-ink) 32%, transparent); transform: translateY(-4px); }
+  .pi-val { font-family: var(--s-display); font-size: 1.05rem; color: var(--brand); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pi-row:hover .pi-name { color: var(--brand); }
+  .pi-row.today .pi-name { color: var(--brand); font-weight: 600; }
+
+  /* --- galerija: gravire -------------------------------------------------- */
+  .pi-plates { display: grid; gap: 1.5rem 1.1rem; grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 640px) { .pi-plates { grid-template-columns: repeat(3, 1fr); } }
+  .pi-plate { margin: 0; }
+  .pi-plate-art {
+    background: var(--s-bg); border: 1px solid var(--s-line); padding: 0.5rem;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s;
+  }
+  .pi-plate:hover .pi-plate-art { transform: translateY(-4px); box-shadow: 0 18px 40px -25px rgba(0, 0, 0, 0.4); }
+  .pi-plate-art > div { position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
+  .pi-plate-art > div > div { position: absolute; inset: -8%; }
+  .pi-plate figcaption { margin-top: 0.7rem; font-family: var(--s-display); font-style: italic; font-size: 13px; color: var(--s-muted); }
+
+  /* --- tim: kao lista svatova --------------------------------------------- */
+  .pi-member + .pi-member { margin-top: 1.6rem; }
+  .pi-member .st-avatar { margin-inline: auto; }
+  .pi-sep { letter-spacing: 0.6em; color: var(--s-muted); font-size: 11px; }
+
+  .pi-phone { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(1.9rem, 6vw, 2.9rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
+  .pi-phone:hover { color: var(--brand); }
+  .pi-sign { font-family: var(--s-display); font-style: italic; font-size: 1.25rem; color: var(--s-muted); }
+
+  .pi-fade { opacity: 0; transform: translateY(14px); animation: pi-fade 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: var(--d, 0s); }
+  @keyframes pi-fade { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pi-fade { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <!-- Navigacija -->
+  <nav class="pi-nav" data-nav>
+    <div style="max-width:46rem;margin-inline:auto;padding-inline:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;height:4.25rem">
+      <a href="#vrh" style="text-decoration:none;color:inherit"><span class="st-serif" style="font-size:17px">{{ site.name }}</span></a>
+      <a class="st-btn st-btn-gold st-btn-shine" style="height:2.75rem;padding-inline:1.2rem;font-size:13px" href="tel:{{ site.phoneRaw }}">Zakaži</a>
+    </div>
+  </nav>
+
+  <main class="pi-main" id="vrh">
+    <!-- Hero list: pozivnica -->
+    <header class="pi-sheet pi-fade" data-hero>
+      <span class="pi-seal st-serif" aria-hidden="true">{{ site.name | first }}</span>
+      <div class="pi-mono st-serif pi-fade" style="--d:.1s">{{ site.name | first }}</div>
+      <p class="st-kicker pi-fade" style="--d:.2s;margin-top:1.6rem">{{ site.tagline }}</p>
+      <h1 class="st-serif pi-h pi-h1 pi-fade" style="--d:.3s;margin-top:1.1rem;font-size:clamp(2.2rem,6vw,3.4rem)">Pozvani ste na malo <em>razmaženosti.</em></h1>
+      <p class="pi-fade" style="--d:.42s;margin-top:1.3rem;margin-inline:auto;max-width:30rem;color:var(--s-muted);font-size:16px;line-height:1.7">{{ site.about }}</p>
+      {{ flourish() }}
+      <p class="pi-fade" style="--d:.5s;margin-top:1rem;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--s-muted)">— {{ site.city }} —</p>
+      <div class="pi-fade" style="--d:.58s;margin-top:1.9rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+        <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+        <a class="st-btn st-btn-ghost" href="#cenovnik">Meni usluga</a>
+      </div>
+    </header>
+
+    <!-- O nama -->
+    <section class="pi-sheet" id="onama">
+      <p class="st-kicker rev">O nama</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">Zanat star koliko i lepota. <em>Pristup — nov.</em></h2>
+      <p class="rev" style="margin-top:1.3rem;margin-inline:auto;max-width:32rem;color:var(--s-muted);font-size:15px;line-height:1.75">{{ site.aboutLong }}</p>
+      <div style="margin-top:2.2rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.4rem">
+        {% for f in site.facts %}
+        <div class="rev" style="--d:{{ loop.index0 * 0.12 }}s">
+          <p class="st-serif" style="font-size:1.9rem;color:var(--brand)">{{ f.n }}</p>
+          <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s-muted);margin-top:.2rem">{{ f.label }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Cenovnik: meni usluga -->
+    <section class="pi-sheet" id="cenovnik">
+      <p class="st-kicker rev">Cenovnik</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">Meni <em>usluga.</em></h2>
+      {{ flourish() }}
+      <div class="pi-menu rev" style="margin-top:1.4rem">
+        {% for s in services %}
+        <div class="pi-row">
+          <div>
+            <p class="pi-name" style="font-size:15px;transition:color .25s">{{ s.name }}</p>
+            <p style="font-size:11px;color:var(--s-muted);margin-top:.15rem">{{ s.durationMin }} min</p>
+          </div>
+          <span class="pi-dots" aria-hidden="true"></span>
+          <span class="pi-val">{{ s.price }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="rev" style="margin-top:1.4rem;font-size:12px;color:var(--s-muted)">Cene su informativne — javi nam se porukom za tačnu procenu.</p>
+    </section>
+
+    <!-- Galerija: gravire -->
+    <section class="pi-sheet" id="galerija">
+      <p class="st-kicker rev">Galerija</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">Uspomene <em>iz salona.</em></h2>
+      <div class="pi-plates rev" style="margin-top:2rem">
+        {% for g in gallery %}
+        <figure class="pi-plate">
+          <div class="pi-plate-art"><div><div style="background:{{ g.art }}"></div></div></div>
+          <figcaption>{{ g.label }}</figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Tim -->
+    <section class="pi-sheet" id="tim">
+      <p class="st-kicker rev">Tim</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">S rukama <em>od poverenja.</em></h2>
+      <div style="margin-top:2rem">
+        {% for m in staff %}
+        <div class="pi-member rev" style="--d:{{ loop.index0 * 0.1 }}s">
+          <span class="st-avatar st-serif" style="background:{{ m.color }}">{{ m.initials }}</span>
+          <p class="st-serif" style="margin-top:.8rem;font-size:1.25rem">{{ m.name }}</p>
+          <p style="margin-top:.2rem;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--s-muted)">{{ m.role }}</p>
+        </div>
+        {% if not loop.last %}<p class="pi-sep" aria-hidden="true" style="margin-top:1.4rem">· · ·</p>{% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Radno vreme -->
+    <section class="pi-sheet" id="vreme">
+      <p class="st-kicker rev">Radno vreme</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">Kada smo <em>tu za tebe.</em></h2>
+      <div class="pi-menu rev" style="margin-top:1.6rem;max-width:24rem">
+        {% for h in hours %}
+        <div class="pi-row {% if h.today %}today{% endif %}" style="padding:.55rem 0">
+          <span class="pi-name" style="font-size:14px">{{ h.label }}</span>
+          <span class="pi-dots" aria-hidden="true"></span>
+          <span style="font-size:14px;font-variant-numeric:tabular-nums;{% if not h.open %}color:var(--s-muted){% endif %}">{{ h.time }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Kontakt: potpis pisma -->
+    <section class="pi-sheet" id="kontakt">
+      <p class="st-kicker rev">Kontakt</p>
+      <h2 class="st-serif pi-h rev" style="margin-top:1rem">Odgovori na <em>pozivnicu.</em></h2>
+      <a class="pi-phone rev" style="display:inline-block;margin-top:1.2rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+      <p class="rev" style="margin-top:.7rem;color:var(--s-muted);font-size:14px">
+        <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+      </p>
+      <div class="rev" style="margin-top:1.7rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+        <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Pozovi salon</a>
+        <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+      </div>
+      {{ flourish() }}
+      <p class="pi-sign rev" style="margin-top:.9rem">S ljubavlju, {{ site.name }}</p>
+    </section>
+  </main>
+
+  {{ shared.footer(site, year) }}
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+{% endblock %}
