@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { SITE_THEMES, safeTheme } from "../site-themes.js";
+import { SITE_LAYOUTS, safeLayout } from "../site-layouts.js";
 
 /**
  * Javna početna strana (Faza 4). Sadržaj stoji ovde, a ne razbacan po template-u,
@@ -177,17 +178,22 @@ export async function marketingRoutes(app: FastifyInstance) {
   });
 
   // Demo mini sajta salona (Faza 9) — izlog dizajna sa mock podacima.
-  // ?tema=noc|klasicna|moderna|ruz|smaragd|papir (teme žive u src/web/site-themes.ts).
+  // ?izgled=aurora|magazin|split|bento|vizit|cinema (src/web/site-layouts.ts)
+  // ?tema=noc|klasicna|… (src/web/site-themes.ts) — traka na vrhu nudi oba.
   app.get("/sajt-demo", (req, reply) => {
     const origin = originOf(req);
     const s = DEMO_SITE.site;
-    const theme = safeTheme((req.query as Record<string, unknown>).tema);
+    const q = req.query as Record<string, unknown>;
+    const theme = safeTheme(q.tema);
+    const layout = safeLayout(q.izgled);
     const description = `${s.name}, ${s.city} — cenovnik, radno vreme i zakazivanje. ${s.about}`;
-    return reply.view("site.njk", {
+    return reply.view(`sites/${layout.template}`, {
       ...DEMO_SITE,
       demo: true,
       theme,
+      layout,
       themeList: Object.values(SITE_THEMES),
+      layoutList: Object.values(SITE_LAYOUTS),
       hours: demoHours(),
       year: new Date().getFullYear(),
       meta: { title: `${s.name} — zakazivanje i cenovnik`, description, url: `${origin}/sajt-demo`, origin },

@@ -1,0 +1,244 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Split": klasičan portfolio raspored — fiksni levi panel
+     (ime, nav, telefon, radno vreme) + desna kolona koja skroluje.
+     Na telefonu panel postaje sticky header koji se skupi na skrol.
+     ==================================================================== */
+
+  /* --- levi panel / mobilni header -------------------------------------- */
+  .sp-aside {
+    position: sticky; top: var(--demo-offset, 0); z-index: 50;
+    background: color-mix(in srgb, var(--s-bg) 92%, transparent); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--s-line);
+    padding: 1.1rem 1.25rem; transition: padding 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sp-aside.scrolled { padding-block: 0.55rem; }
+  .sp-aside-in { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .sp-logo {
+    display: inline-flex; height: 2.4rem; width: 2.4rem; flex: none; align-items: center; justify-content: center;
+    border-radius: 9999px; border: 1px solid color-mix(in srgb, var(--brand) 55%, transparent);
+    color: var(--brand); font-size: 16px;
+  }
+  .sp-name { font-size: 18px; line-height: 1.15; }
+  .sp-city { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--s-muted); }
+  .sp-panel-body { display: none; }
+  .sp-nav { display: flex; flex-direction: column; gap: 0.15rem; }
+  .sp-nav a {
+    display: flex; align-items: center; gap: 0.7rem; min-height: 44px; text-decoration: none;
+    color: var(--s-muted); font-size: 14px; transition: color 0.25s, gap 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .sp-nav a::before { content: ""; height: 1px; width: 1.1rem; background: var(--s-line); transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s; }
+  .sp-nav a:hover { color: var(--s-ink); gap: 1rem; }
+  .sp-nav a:hover::before { width: 1.8rem; background: var(--brand); }
+  .sp-phone { font-size: clamp(1.4rem, 2.2vw, 1.75rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
+  .sp-phone:hover { color: var(--brand); }
+  .sp-mini-hours { font-size: 13px; color: var(--s-muted); display: grid; gap: 0.3rem; font-variant-numeric: tabular-nums; }
+  .sp-mini-hours .today { color: var(--brand); font-weight: 600; }
+
+  /* --- desna kolona ------------------------------------------------------- */
+  .sp-main { padding-inline: 1.25rem; }
+  .sp-section { padding-block: 4.5rem; border-bottom: 1px solid var(--s-line); scroll-margin-top: calc(var(--demo-offset, 0px) + 5.5rem); }
+  .sp-h2 { font-size: clamp(1.8rem, 4vw, 2.7rem); line-height: 1.1; }
+  .sp-h2 em { color: var(--brand); font-style: italic; }
+
+  /* hero desne kolone */
+  .sp-hero { padding-block: 5.5rem 4.5rem; border-bottom: 1px solid var(--s-line); position: relative; overflow: clip; }
+  .sp-hero-glow { position: absolute; inset: 0; pointer-events: none; }
+  .sp-hero-glow span { position: absolute; border-radius: 9999px; filter: blur(80px); }
+  .sp-hero-glow span:nth-child(1) { width: 30rem; height: 30rem; right: -10rem; top: -10rem; background: radial-gradient(circle, var(--s-aurora1), transparent 65%); }
+  .sp-hero-glow span:nth-child(2) { width: 24rem; height: 24rem; left: -8rem; bottom: -12rem; background: radial-gradient(circle, var(--s-aurora2), transparent 65%); }
+  .sp-h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); line-height: 1.05; }
+  .sp-h1 em { font-style: italic; color: var(--brand); }
+
+  /* cenovnik */
+  .sp-price-row { display: flex; align-items: baseline; gap: 0.9rem; padding: 1.1rem 0.25rem; border-bottom: 1px solid var(--s-line); transition: padding-left 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+  .sp-price-row:last-child { border-bottom: 0; }
+  .sp-price-row:hover { padding-left: 0.9rem; }
+  .sp-price-dots { flex: 1; border-bottom: 1px dotted color-mix(in srgb, var(--s-ink) 22%, transparent); transform: translateY(-5px); }
+  .sp-price-val { font-variant-numeric: tabular-nums; transition: color 0.3s; }
+  .sp-price-row:hover .sp-price-val { color: var(--brand); }
+
+  /* galerija 2 kolone */
+  .sp-tiles { display: grid; gap: 0.9rem; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .sp-tiles { grid-template-columns: repeat(2, 1fr); } }
+  .sp-tiles .st-tile { aspect-ratio: 4 / 3; }
+
+  /* tim */
+  .sp-team { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  .sp-member { border: 1px solid var(--s-line); border-radius: var(--s-radius); padding: 1.4rem 1.2rem; background: var(--s-surface); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s; }
+  .sp-member:hover { transform: translateY(-5px); border-color: color-mix(in srgb, var(--brand) 45%, transparent); }
+
+  /* --- desktop: panel postaje fiksna leva kolona ------------------------- */
+  @media (min-width: 1024px) {
+    .sp-aside {
+      position: fixed; top: var(--demo-offset, 0); left: 0; bottom: 0; width: 23rem;
+      border-right: 1px solid var(--s-line); border-bottom: 0;
+      background: var(--s-surface); backdrop-filter: none;
+      padding: 2.75rem 2.5rem; display: flex; flex-direction: column;
+    }
+    .sp-aside.scrolled { padding-block: 2.75rem; }
+    .sp-aside-in { flex-direction: column; align-items: flex-start; gap: 1.1rem; }
+    .sp-aside-cta { display: none; }
+    .sp-panel-body { display: flex; flex-direction: column; gap: 2rem; margin-top: 2.4rem; flex: 1; }
+    .sp-panel-foot { margin-top: auto; }
+    .sp-main { margin-left: 23rem; padding-inline: 4rem; }
+    .sp-name { font-size: 26px; }
+    .sp-logo { height: 3rem; width: 3rem; font-size: 19px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <!-- Levi panel (desktop) / header koji se skupi (telefon) -->
+  <aside class="sp-aside" data-nav id="vrh">
+    <div class="sp-aside-in">
+      <a href="#vrh" style="display:flex;align-items:center;gap:.8rem;text-decoration:none;color:inherit">
+        <span class="sp-logo st-serif">{{ site.name[0] }}</span>
+        <span>
+          <span class="st-serif sp-name" style="display:block">{{ site.name }}</span>
+          <span class="sp-city">{{ site.city }}</span>
+        </span>
+      </a>
+      <a class="st-btn st-btn-gold sp-aside-cta" style="height:2.75rem;padding-inline:1.1rem;font-size:13px" href="tel:{{ site.phoneRaw }}">Zakaži</a>
+    </div>
+
+    <div class="sp-panel-body">
+      <nav class="sp-nav" aria-label="Sekcije">
+        <a href="#onama">O nama</a>
+        <a href="#cenovnik">Cenovnik</a>
+        <a href="#galerija">Galerija</a>
+        <a href="#tim">Tim</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+
+      <div>
+        <p class="st-kicker">Radno vreme</p>
+        <div class="sp-mini-hours" style="margin-top:.8rem">
+          {% for h in hours %}
+          <span class="{% if h.today %}today{% endif %}" style="display:flex;justify-content:space-between;gap:1rem">
+            <span>{{ h.label }}</span><span>{{ h.time }}</span>
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="sp-panel-foot">
+        <p class="st-kicker">Telefon</p>
+        <a class="st-serif sp-phone" style="display:inline-block;margin-top:.5rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+        <div style="margin-top:1.4rem;display:flex;flex-direction:column;gap:.7rem">
+          <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+          <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Desna kolona -->
+  <main class="sp-main">
+    <header class="sp-hero" data-hero>
+      <div class="sp-hero-glow" aria-hidden="true"><span></span><span></span></div>
+      <div style="position:relative;max-width:44rem">
+        <p class="st-kicker">{{ site.tagline }}</p>
+        <h1 class="st-serif sp-h1" style="margin-top:1.1rem">Kosa koja govori <em>umesto tebe.</em></h1>
+        <p style="margin-top:1.5rem;max-width:32rem;color:var(--s-muted);font-size:16px;line-height:1.7">{{ site.about }}</p>
+        <div style="margin-top:2.2rem;display:flex;flex-wrap:wrap;gap:.9rem">
+          <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+          <a class="st-btn st-btn-ghost" href="#cenovnik">Cenovnik</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="sp-section" id="onama">
+      <div style="max-width:44rem">
+        <p class="st-kicker rev">O nama</p>
+        <h2 class="st-serif sp-h2 rev" style="margin-top:1rem">Zanat star koliko i lepota. <em>Pristup — nov.</em></h2>
+        <p class="rev" style="margin-top:1.4rem;color:var(--s-muted);font-size:16px;line-height:1.75">{{ site.aboutLong }}</p>
+        <div style="margin-top:2.2rem;display:flex;flex-wrap:wrap;gap:2.4rem">
+          {% for f in site.facts %}
+          <div class="rev" style="--d:{{ loop.index0 * 0.1 }}s">
+            <p class="st-serif" style="font-size:1.9rem;color:var(--brand)">{{ f.n }}</p>
+            <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s-muted);margin-top:.2rem">{{ f.label }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="sp-section" id="cenovnik">
+      <div style="max-width:44rem">
+        <p class="st-kicker rev">Cenovnik</p>
+        <h2 class="st-serif sp-h2 rev" style="margin-top:1rem">Jasne cene. Bez zvezdica.</h2>
+        <div class="rev" style="margin-top:2rem">
+          {% for s in services %}
+          <div class="sp-price-row">
+            <div>
+              <p style="font-size:16px">{{ s.name }}</p>
+              <p style="font-size:12px;color:var(--s-muted)">{{ s.durationMin }} min</p>
+            </div>
+            <span class="sp-price-dots" aria-hidden="true"></span>
+            <span class="sp-price-val">{{ s.price }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="rev" style="margin-top:1.4rem;font-size:13px;color:var(--s-muted)">Cene su informativne — za duge/gušće kose javi nam se porukom pre termina.</p>
+      </div>
+    </section>
+
+    <section class="sp-section" id="galerija">
+      <p class="st-kicker rev">Galerija</p>
+      <h2 class="st-serif sp-h2 rev" style="margin-top:1rem">Radovi koji pričaju.</h2>
+      <div class="sp-tiles" style="margin-top:2rem">
+        {% for g in gallery %}
+        <figure class="st-tile rev" style="--d:{{ loop.index0 * 0.07 }}s">
+          <div class="st-tile-art" style="background:{{ g.art }}"></div>
+          <span class="st-tile-label">{{ g.label }}</span>
+        </figure>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="sp-section" id="tim">
+      <p class="st-kicker rev">Tim</p>
+      <h2 class="st-serif sp-h2 rev" style="margin-top:1rem">Ruke od poverenja.</h2>
+      <div class="sp-team" style="margin-top:2rem">
+        {% for m in staff %}
+        <div class="sp-member rev" style="--d:{{ loop.index0 * 0.1 }}s">
+          <span class="st-avatar st-serif" style="background:{{ m.color }}">{{ m.initials }}</span>
+          <p style="margin-top:1rem;font-size:16px;font-weight:600">{{ m.name }}</p>
+          <p style="margin-top:.2rem;font-size:13px;color:var(--s-muted)">{{ m.role }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="sp-section" id="kontakt" style="border-bottom:0">
+      <p class="st-kicker rev">Kontakt</p>
+      <h2 class="st-serif sp-h2 rev" style="margin-top:1rem">Vidimo se <em>u salonu.</em></h2>
+      <a class="st-serif sp-phone rev" style="display:inline-block;margin-top:1.3rem;font-size:clamp(1.8rem,5vw,3rem)" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+      <p class="rev" style="margin-top:.9rem;color:var(--s-muted);font-size:15px">
+        <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+      </p>
+      <div class="rev" style="margin-top:1.7rem;display:flex;flex-wrap:wrap;gap:.9rem">
+        <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Pozovi salon</a>
+        <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+      </div>
+    </section>
+
+    {{ shared.footer(site, year) }}
+  </main>
+
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+{% endblock %}

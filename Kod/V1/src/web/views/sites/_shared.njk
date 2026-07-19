@@ -1,0 +1,205 @@
+{# ====================================================================
+   Zajednički delovi SVIH izgleda mini sajta (Faza 9). Uvoz u template:
+     {% import "sites/_shared.njk" as shared %}
+   pa u head bloku {{ shared.themeStyle(theme, demo) }}, u sadržaju
+   {{ shared.demoBar(...) }} / {{ shared.footer(...) }} / {{ shared.ctaBar(...) }}
+   i na dnu {{ shared.baseJs() }}.
+
+   Pravilo: OVDE nema nijedne hardkodovane boje teme — samo var(--s-*) i
+   var(--brand). Jedini fiksni tonovi su hrom koji ne zavisi od teme:
+   demo traka (uvek tamna, postoji samo na /sajt-demo), beli sjaj dugmeta
+   i crni foto-overlay na pločicama (pločice su uvek tamne "fotografije").
+   ==================================================================== #}
+
+{% macro themeStyle(theme, demo) %}
+<style>
+  .site {
+    --brand: {{ theme.brand }};
+    --brand-ink: {{ theme.brandInk }};
+    --s-bg: {{ theme.bg }};
+    --s-surface: {{ theme.surface }};
+    --s-ink: {{ theme.ink }};
+    --s-muted: {{ theme.muted }};
+    --s-line: {{ theme.line }};
+    {# | safe: autoescape bi navodnike u font stack-u ("Times New Roman") pretvorio
+       u &quot; koji u <style> ostaje bukvalno → font-family pada na sans.
+       Vrednost je konstanta iz site-themes.ts (SERIF/SANS), ne korisnički unos. #}
+    --s-display: {{ theme.display | safe }};
+    --s-display-weight: {{ theme.displayWeight }};
+    --s-display-tracking: {{ theme.displayTracking }};
+    --s-radius: {{ theme.radius }};
+    --s-grain: {{ theme.grain }};
+    --s-aurora1: {{ theme.aurora[0] }};
+    --s-aurora2: {{ theme.aurora[1] }};
+    --s-aurora3: {{ theme.aurora[2] }};
+    background: var(--s-bg);
+    color: var(--s-ink);
+    overflow-x: clip;
+    scroll-behavior: smooth;
+    min-height: 100svh;
+  }
+  {% if demo %}.site { --demo-offset: 5rem; }{% endif %}
+  .st-serif { font-family: var(--s-display); font-weight: var(--s-display-weight); letter-spacing: var(--s-display-tracking); }
+  .st-kicker { font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--brand); font-weight: 600; }
+
+  /* --- zrno (noise) preko cele strane --------------------------------- */
+  .st-grain::before {
+    content: ""; position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: var(--s-grain);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .site > * { position: relative; z-index: 2; }
+
+  /* --- demo traka: red izgleda + red tema (samo na /sajt-demo) --------- */
+  .st-demo-bar {
+    position: fixed; inset-inline: 0; top: 0; z-index: 60; height: 5rem;
+    display: flex; flex-direction: column; justify-content: center; gap: 0.35rem;
+    background: #0b0b0c; color: rgba(255, 255, 255, 0.85); font-size: 12px;
+  }
+  .st-demo-row {
+    display: flex; align-items: center; gap: 0.5rem; overflow-x: auto; padding-inline: 1rem;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .st-demo-row::-webkit-scrollbar { display: none; }
+  .st-demo-tag { flex: none; width: 3.4rem; opacity: 0.55; }
+  .st-demo-chip {
+    display: inline-flex; align-items: center; gap: 0.45rem; flex: none;
+    padding: 0.28rem 0.7rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.18);
+    color: inherit; text-decoration: none; transition: border-color 0.25s, background 0.25s;
+  }
+  .st-demo-chip:hover { border-color: rgba(255, 255, 255, 0.5); }
+  .st-demo-chip.active { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
+  .st-demo-dot { height: 0.7rem; width: 0.7rem; border-radius: 9999px; border: 1px solid rgba(0, 0, 0, 0.2); }
+
+  /* --- dugmad ----------------------------------------------------------- */
+  .st-btn {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center;
+    gap: 0.5rem; height: 3rem; padding-inline: 1.6rem; border-radius: 9999px;
+    font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s, background 0.3s, color 0.3s, border-color 0.3s;
+  }
+  .st-btn:active { transform: scale(0.97); }
+  .st-btn-gold {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 90%, #fff), var(--brand));
+    color: var(--brand-ink); box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--brand) 55%, transparent);
+  }
+  .st-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -10px color-mix(in srgb, var(--brand) 70%, transparent); }
+  .st-btn-ghost {
+    border: 1px solid var(--s-line); color: var(--s-ink);
+    background: color-mix(in srgb, var(--s-ink) 3%, transparent);
+  }
+  .st-btn-ghost:hover { border-color: color-mix(in srgb, var(--brand) 60%, transparent); color: var(--brand); }
+  .st-btn-shine::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.45) 50%, transparent 60%);
+    transform: translateX(-130%);
+  }
+  .st-btn-shine:hover::after { transition: transform 0.7s ease; transform: translateX(130%); }
+
+  /* --- scroll reveal ----------------------------------------------------- */
+  .rev { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--d, 0s); }
+  .rev-in { opacity: 1; transform: none; }
+
+  /* --- foto pločice (galerija / o nama) ---------------------------------- */
+  .st-tile { position: relative; overflow: hidden; border-radius: var(--s-radius); border: 1px solid var(--s-line); }
+  .st-tile-art { position: absolute; inset: -12%; transition: transform 1.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .st-tile:hover .st-tile-art { transform: scale(1.09) rotate(1.2deg); }
+  .st-tile-label {
+    position: absolute; left: 0.9rem; bottom: 0.8rem; z-index: 1; font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  }
+  .st-tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.42)); }
+
+  /* --- avatar člana tima -------------------------------------------------- */
+  .st-avatar {
+    display: flex; height: 3.4rem; width: 3.4rem; align-items: center; justify-content: center;
+    border-radius: 9999px; font-size: 17px; font-weight: 600; color: #14110d; /* ink na pastelnim bojama radnika (podatak, ne tema) */
+  }
+
+  /* --- footer + mobilni CTA ----------------------------------------------- */
+  .st-foot { border-top: 1px solid var(--s-line); padding-block: 2rem; font-size: 12px; color: var(--s-muted); }
+  .st-foot a { color: inherit; }
+  .st-foot a:hover { color: var(--brand); }
+  .st-cta-bar {
+    position: fixed; inset-inline: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 40;
+    transform: translateY(140%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .st-cta-bar.show { transform: none; }
+  @media (min-width: 768px) { .st-cta-bar { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site { scroll-behavior: auto; }
+    .site *, .site *::before, .site *::after { animation: none !important; transition: none !important; }
+    .rev { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+{% endmacro %}
+
+{% macro demoBar(layoutList, themeList, layout, theme) %}
+<div class="st-demo-bar">
+  <div class="st-demo-row">
+    <span class="st-demo-tag">Izgled:</span>
+    {% for l in layoutList %}
+    <a class="st-demo-chip {% if l.key == layout.key %}active{% endif %}" href="/sajt-demo?izgled={{ l.key }}&tema={{ theme.key }}">{{ l.label }}</a>
+    {% endfor %}
+  </div>
+  <div class="st-demo-row">
+    <span class="st-demo-tag">Tema:</span>
+    {% for t in themeList %}
+    <a class="st-demo-chip {% if t.key == theme.key %}active{% endif %}" href="/sajt-demo?izgled={{ layout.key }}&tema={{ t.key }}">
+      <span class="st-demo-dot" style="background:{{ t.brand }}"></span>{{ t.label }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro footer(site, year) %}
+<footer class="st-foot">
+  <div style="max-width:68rem;margin-inline:auto;padding-inline:1.25rem;display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between">
+    <span>© {{ year }} {{ site.name }}</span>
+    <span>Napravljeno u <a href="/">Tefteru</a> — sajt koji se sam ažurira</span>
+  </div>
+</footer>
+{% endmacro %}
+
+{% macro ctaBar(site) %}
+<div class="st-cta-bar" id="stCtaBar">
+  <a class="st-btn st-btn-gold" style="width:100%;box-shadow:0 14px 40px -8px rgba(0,0,0,.7)" href="tel:{{ site.phoneRaw }}">Zakaži termin — {{ site.phone }}</a>
+</div>
+{% endmacro %}
+
+{# Reveal animacije + glass nav ([data-nav]) + mobilni CTA (pojavi se kad
+   [data-hero] izađe iz kadra). Radi i kad stranu skroluje kontejner (cinema),
+   jer IntersectionObserver gleda viewport. #}
+{% macro baseJs() %}
+<script>
+  (function () {
+    var nav = document.querySelector("[data-nav]");
+    if (nav) {
+      var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 24); };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
+
+    var revs = document.querySelectorAll(".rev");
+    if (!("IntersectionObserver" in window)) {
+      revs.forEach(function (el) { el.classList.add("rev-in"); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("rev-in"); io.unobserve(e.target); }
+        });
+      }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+      revs.forEach(function (el) { io.observe(el); });
+    }
+
+    var bar = document.getElementById("stCtaBar");
+    var hero = document.querySelector("[data-hero]");
+    if (bar && hero && "IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        bar.classList.toggle("show", !entries[0].isIntersecting);
+      }, { threshold: 0.05 }).observe(hero);
+    }
+  })();
+</script>
+{% endmacro %}

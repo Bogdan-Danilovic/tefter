@@ -1,67 +1,16 @@
 {% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
 {% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
 
 {% block head %}
+{{ shared.themeStyle(theme, demo) }}
 <style>
   /* ====================================================================
-     Mini sajt salona (Faza 9). Cela tema su CSS varijable ispod — vrednosti
-     stižu iz src/web/site-themes.ts, template i CSS su isti za sve teme.
+     Izgled "Aurora": fullscreen hero sa svetlosnim oblacima, marquee,
+     sekcije naniže. Boje/tipografija stižu iz teme (--s-*, --brand);
+     zajednički delovi (dugmad, pločice, reveal…) su u sites/_shared.njk.
      ==================================================================== */
-  .site {
-    --brand: {{ theme.brand }};
-    --brand-ink: {{ theme.brandInk }};
-    --s-bg: {{ theme.bg }};
-    --s-surface: {{ theme.surface }};
-    --s-ink: {{ theme.ink }};
-    --s-muted: {{ theme.muted }};
-    --s-line: {{ theme.line }};
-    {# | safe: autoescape bi navodnike u font stack-u ("Times New Roman") pretvorio
-       u &quot; koji u <style> ostaje bukvalno → ceo font-family pada na sans.
-       Vrednost je konstanta iz site-themes.ts (SERIF/SANS), ne korisnički unos. #}
-    --s-display: {{ theme.display | safe }};
-    --s-display-weight: {{ theme.displayWeight }};
-    --s-display-tracking: {{ theme.displayTracking }};
-    --s-radius: {{ theme.radius }};
-    --s-grain: {{ theme.grain }};
-    --s-aurora1: {{ theme.aurora[0] }};
-    --s-aurora2: {{ theme.aurora[1] }};
-    --s-aurora3: {{ theme.aurora[2] }};
-    background: var(--s-bg);
-    color: var(--s-ink);
-    overflow-x: clip;
-    scroll-behavior: smooth;
-  }
-  .st-serif { font-family: var(--s-display); font-weight: var(--s-display-weight); letter-spacing: var(--s-display-tracking); }
-  .st-kicker {
-    font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase;
-    color: var(--brand); font-weight: 600;
-  }
   .st-wrap { max-width: 68rem; margin-inline: auto; padding-inline: 1.25rem; }
-
-  /* --- zrno (noise) preko cele strane — daje "print" teksturu ---------- */
-  .st-grain::before {
-    content: ""; position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: var(--s-grain);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  .site > * { position: relative; z-index: 2; }
-
-  /* --- demo traka za biranje teme (samo na /sajt-demo) ------------------ */
-  .st-demo-bar {
-    position: fixed; inset-inline: 0; top: 0; z-index: 60; height: 2.75rem;
-    display: flex; align-items: center; gap: 0.6rem; overflow-x: auto; padding-inline: 1rem;
-    background: #0b0b0c; color: rgba(255, 255, 255, 0.85); font-size: 12px;
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  .st-demo-bar::-webkit-scrollbar { display: none; }
-  .st-demo-chip {
-    display: inline-flex; align-items: center; gap: 0.45rem; flex: none;
-    padding: 0.32rem 0.75rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.18);
-    color: inherit; text-decoration: none; transition: border-color 0.25s, background 0.25s;
-  }
-  .st-demo-chip:hover { border-color: rgba(255, 255, 255, 0.5); }
-  .st-demo-chip.active { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
-  .st-demo-dot { height: 0.7rem; width: 0.7rem; border-radius: 9999px; border: 1px solid rgba(0, 0, 0, 0.2); }
-  {% if demo %}.site { --demo-offset: 2.75rem; }{% endif %}
 
   /* --- navigacija ------------------------------------------------------- */
   .st-nav {
@@ -88,31 +37,7 @@
   }
   .st-nav-link:hover { color: var(--s-ink); }
   .st-nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
-
-  /* --- dugmad ----------------------------------------------------------- */
-  .st-btn {
-    position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center;
-    gap: 0.5rem; height: 3rem; padding-inline: 1.6rem; border-radius: 9999px;
-    font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s, background 0.3s, color 0.3s;
-  }
-  .st-btn:active { transform: scale(0.97); }
-  .st-btn-gold {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 90%, #fff), var(--brand));
-    color: var(--brand-ink); box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--brand) 55%, transparent);
-  }
-  .st-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -10px color-mix(in srgb, var(--brand) 70%, transparent); }
-  .st-btn-ghost {
-    border: 1px solid var(--s-line); color: var(--s-ink);
-    background: color-mix(in srgb, var(--s-ink) 3%, transparent);
-  }
-  .st-btn-ghost:hover { border-color: color-mix(in srgb, var(--brand) 60%, transparent); color: var(--brand); }
-  .st-btn-shine::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.45) 50%, transparent 60%);
-    transform: translateX(-130%);
-  }
-  .st-btn-shine:hover::after { transition: transform 0.7s ease; transform: translateX(130%); }
+  @media (min-width: 768px) { .st-nav-links { display: flex !important; } }
 
   /* --- hero -------------------------------------------------------------- */
   .st-hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; position: relative; padding-top: var(--demo-offset, 0); }
@@ -162,10 +87,6 @@
   .st-marquee-track span i { color: var(--brand); font-style: normal; margin-left: 3rem; }
   @keyframes st-marq { to { transform: translateX(-50%); } }
 
-  /* --- scroll reveal ------------------------------------------------------ */
-  .rev { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--d, 0s); }
-  .rev-in { opacity: 1; transform: none; }
-
   /* --- sekcije ------------------------------------------------------------ */
   .st-section { padding-block: 6rem; }
   .st-h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); line-height: 1.1; }
@@ -183,14 +104,7 @@
   /* galerija */
   .st-tiles { display: grid; gap: 0.9rem; grid-template-columns: repeat(2, 1fr); }
   @media (min-width: 768px) { .st-tiles { grid-template-columns: repeat(3, 1fr); } }
-  .st-tile { position: relative; overflow: hidden; border-radius: var(--s-radius); aspect-ratio: 4 / 5; border: 1px solid var(--s-line); }
-  .st-tile-art { position: absolute; inset: -12%; transition: transform 1.3s cubic-bezier(0.22, 1, 0.36, 1); }
-  .st-tile:hover .st-tile-art { transform: scale(1.09) rotate(1.2deg); }
-  .st-tile-label {
-    position: absolute; left: 0.9rem; bottom: 0.8rem; z-index: 1; font-size: 12px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
-  }
-  .st-tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.42)); }
+  .st-tiles .st-tile { aspect-ratio: 4 / 5; }
 
   /* tim */
   .st-team { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
@@ -199,10 +113,6 @@
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s, box-shadow 0.4s;
   }
   .st-member:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--brand) 45%, transparent); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.45); }
-  .st-avatar {
-    display: flex; height: 3.4rem; width: 3.4rem; align-items: center; justify-content: center;
-    border-radius: 9999px; font-size: 17px; font-weight: 600; color: #14110d;
-  }
 
   /* radno vreme */
   .st-hours { border: 1px solid var(--s-line); border-radius: var(--s-radius); overflow: hidden; background: var(--s-surface); }
@@ -214,24 +124,12 @@
   .st-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: var(--brand); animation: st-ping 1.9s cubic-bezier(0, 0, 0.2, 1) infinite; }
   @keyframes st-ping { 75%, 100% { transform: scale(2.6); opacity: 0; } }
 
-  /* kontakt + footer */
+  /* kontakt */
   .st-phone { font-size: clamp(1.9rem, 6vw, 3.4rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
   .st-phone:hover { color: var(--brand); }
-  .st-foot { border-top: 1px solid var(--s-line); padding-block: 2rem; font-size: 12px; color: var(--s-muted); }
-  .st-foot a { color: inherit; }
-  .st-foot a:hover { color: var(--brand); }
-
-  /* fiksni CTA na telefonu (pojavi se kad hero izađe iz kadra) */
-  .st-cta-bar {
-    position: fixed; inset-inline: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 40;
-    transform: translateY(140%); transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .st-cta-bar.show { transform: none; }
-  @media (min-width: 768px) { .st-cta-bar { display: none; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .site *, .site *::before, .site *::after { animation: none !important; transition: none !important; }
-    .rev, .st-line > span, .st-fade-late { opacity: 1 !important; transform: none !important; }
+    .st-line > span, .st-fade-late { opacity: 1 !important; transform: none !important; }
     .st-rule { width: 7rem; }
   }
 </style>
@@ -240,20 +138,10 @@
 {% block content %}
 <div class="site st-grain">
 
-  {% if demo %}
-  <!-- Traka za biranje teme — postoji samo na /sajt-demo -->
-  <div class="st-demo-bar">
-    <span style="flex:none;opacity:.6">Tema:</span>
-    {% for t in themeList %}
-    <a class="st-demo-chip {% if t.key == theme.key %}active{% endif %}" href="/sajt-demo?tema={{ t.key }}">
-      <span class="st-demo-dot" style="background:{{ t.brand }}"></span>{{ t.label }}
-    </a>
-    {% endfor %}
-  </div>
-  {% endif %}
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
 
   <!-- Navigacija -->
-  <nav class="st-nav" id="stNav">
+  <nav class="st-nav" data-nav>
     <div class="st-wrap" style="display:flex;align-items:center;justify-content:space-between;height:4.25rem">
       <a href="#vrh" style="display:flex;align-items:center;gap:.7rem;text-decoration:none;color:inherit">
         <span class="st-logo st-serif">{{ site.name[0] }}</span>
@@ -266,13 +154,12 @@
         <a class="st-nav-link" href="#tim">Tim</a>
         <a class="st-nav-link" href="#kontakt">Kontakt</a>
       </div>
-      <a class="st-btn st-btn-gold st-btn-shine" style="height:2.6rem;padding-inline:1.2rem;font-size:13px" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+      <a class="st-btn st-btn-gold st-btn-shine" style="height:2.75rem;padding-inline:1.2rem;font-size:13px" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
     </div>
   </nav>
-  <style>@media (min-width: 768px) { .st-nav-links { display: flex !important; } }</style>
 
   <!-- Hero -->
-  <header class="st-hero" id="vrh">
+  <header class="st-hero" id="vrh" data-hero>
     <div class="st-aurora" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="st-wrap" style="position:relative">
       <p class="st-kicker st-fade-late" style="animation-delay:.1s">{{ site.tagline }}</p>
@@ -416,43 +303,9 @@
     </div>
   </section>
 
-  <footer class="st-foot">
-    <div class="st-wrap" style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between">
-      <span>© {{ year }} {{ site.name }}</span>
-      <span>Napravljeno u <a href="/">Tefteru</a> — sajt koji se sam ažurira</span>
-    </div>
-  </footer>
-
-  <!-- Mobilni fiksni CTA -->
-  <div class="st-cta-bar" id="stCtaBar">
-    <a class="st-btn st-btn-gold" style="width:100%;box-shadow:0 14px 40px -8px rgba(0,0,0,.7)" href="tel:{{ site.phoneRaw }}">Zakaži termin — {{ site.phone }}</a>
-  </div>
+  {{ shared.footer(site, year) }}
+  {{ shared.ctaBar(site) }}
 </div>
 
-<script>
-  (function () {
-    var nav = document.getElementById("stNav");
-    var bar = document.getElementById("stCtaBar");
-    var hero = document.querySelector(".st-hero");
-
-    var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 24); };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    if (!("IntersectionObserver" in window)) {
-      document.querySelectorAll(".rev").forEach(function (el) { el.classList.add("rev-in"); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add("rev-in"); io.unobserve(e.target); }
-      });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
-    document.querySelectorAll(".rev").forEach(function (el) { io.observe(el); });
-
-    new IntersectionObserver(function (entries) {
-      bar.classList.toggle("show", !entries[0].isIntersecting);
-    }, { threshold: 0.05 }).observe(hero);
-  })();
-</script>
+{{ shared.baseJs() }}
 {% endblock %}

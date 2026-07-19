@@ -1,0 +1,252 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Magazin": editorial naslovnica — ogromna tipografija preko cele
+     širine, numerisane sekcije, asimetrična mreža, galerija kao horizontalna
+     traka. Tanka linija navigacije na vrhu.
+     ==================================================================== */
+  .mg-wrap { max-width: 76rem; margin-inline: auto; padding-inline: 1.25rem; }
+
+  /* tanka nav linija */
+  .mg-nav {
+    position: fixed; inset-inline: 0; top: var(--demo-offset, 0); z-index: 50;
+    border-bottom: 1px solid var(--s-line);
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  .mg-nav.scrolled { background: color-mix(in srgb, var(--s-bg) 85%, transparent); backdrop-filter: blur(12px); }
+  .mg-nav-in {
+    display: flex; align-items: center; justify-content: space-between; height: 2.9rem;
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+  }
+  .mg-nav-in a { color: inherit; text-decoration: none; transition: color 0.25s; display: inline-flex; align-items: center; min-height: 44px; }
+  .mg-nav-in a:hover { color: var(--brand); }
+
+  /* naslovnica */
+  .mg-cover { padding-top: calc(var(--demo-offset, 0px) + 6.5rem); }
+  .mg-topline { display: flex; justify-content: space-between; gap: 1rem; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--s-muted); }
+  .mg-topline b { color: var(--brand); font-weight: 600; }
+  .mg-title { margin-top: 1.2rem; font-size: clamp(3.4rem, 17vw, 13rem); line-height: 0.94; text-transform: uppercase; overflow-wrap: anywhere; }
+  .mg-title .mg-word { display: block; overflow: hidden; }
+  .mg-title .mg-word > span { display: block; transform: translateY(115%); animation: mg-rise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; animation-delay: calc(var(--i) * 0.1s); }
+  @keyframes mg-rise { to { transform: translateY(0); } }
+  .mg-meta {
+    margin-top: 2rem; border-block: 1px solid var(--s-line); padding-block: 0.9rem;
+    display: flex; flex-wrap: wrap; gap: 0.9rem 2rem; font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--s-muted); font-variant-numeric: tabular-nums;
+  }
+  .mg-meta b { color: var(--brand); font-weight: 600; margin-right: 0.4rem; }
+  .mg-lede { margin-top: 2.4rem; max-width: 44rem; font-size: clamp(1.05rem, 2.2vw, 1.35rem); line-height: 1.6; color: var(--s-muted); }
+
+  /* numerisane sekcije */
+  .mg-section { padding-block: 5rem; }
+  .mg-head { display: flex; align-items: baseline; gap: 1.1rem; border-top: 2px solid var(--s-ink); padding-top: 1rem; }
+  .mg-num { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; color: color-mix(in srgb, var(--s-ink) 16%, transparent); font-variant-numeric: tabular-nums; }
+  .mg-h2 { font-size: clamp(1.7rem, 4vw, 2.7rem); line-height: 1.08; }
+  .mg-h2 em { color: var(--brand); font-style: italic; }
+
+  /* asimetrična mreža */
+  .mg-grid { display: grid; gap: 2.2rem; }
+  @media (min-width: 900px) {
+    .mg-grid { grid-template-columns: repeat(12, 1fr); }
+    .mg-grid > .mg-l { grid-column: 1 / 6; }
+    .mg-grid > .mg-r { grid-column: 7 / 13; }
+    .mg-grid > .mg-r-off { grid-column: 6 / 13; padding-top: 2.5rem; }
+  }
+
+  /* cenovnik — editorial redovi */
+  .mg-price { border-top: 1px solid var(--s-line); }
+  .mg-price-row {
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0.4rem 1.5rem;
+    padding: 1.25rem 0.25rem; border-bottom: 1px solid var(--s-line);
+    transition: background 0.3s, padding-left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mg-price-row:hover { background: color-mix(in srgb, var(--s-ink) 3%, transparent); padding-left: 1rem; }
+  .mg-price-name { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(1.2rem, 2.6vw, 1.7rem); }
+  .mg-price-min { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s-muted); }
+  .mg-price-val { font-size: clamp(1.05rem, 2.2vw, 1.4rem); font-variant-numeric: tabular-nums; transition: color 0.3s; }
+  .mg-price-row:hover .mg-price-val { color: var(--brand); }
+
+  /* galerija — horizontalna traka (namerni horizontalni scroll UNUTAR trake) */
+  .mg-strip {
+    display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 2.2rem 1.25rem 0.9rem; -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .mg-strip::-webkit-scrollbar { display: none; }
+  .mg-strip .st-tile { flex: none; width: min(72vw, 20rem); aspect-ratio: 4 / 5; scroll-snap-align: start; }
+  .mg-hint { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--s-muted); }
+
+  /* tim — editorial spisak */
+  .mg-member {
+    display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 0.25rem;
+    border-bottom: 1px solid var(--s-line); transition: padding-left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mg-member:hover { padding-left: 1rem; }
+  .mg-member-name { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(1.2rem, 2.6vw, 1.6rem); }
+  .mg-member-role { margin-left: auto; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s-muted); text-align: right; }
+
+  /* kontakt */
+  .mg-phone { font-family: var(--s-display); font-weight: var(--s-display-weight); letter-spacing: var(--s-display-tracking); font-size: clamp(2rem, 6vw, 3.6rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
+  .mg-phone:hover { color: var(--brand); }
+  .mg-hours-row { display: flex; justify-content: space-between; padding: 0.7rem 0.25rem; border-bottom: 1px solid var(--s-line); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .mg-hours-row.today { color: var(--brand); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-title .mg-word > span { transform: none !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <!-- Tanka linija navigacije -->
+  <nav class="mg-nav" data-nav>
+    <div class="mg-wrap mg-nav-in">
+      <a href="#vrh">{{ site.name }}</a>
+      <a href="tel:{{ site.phoneRaw }}"><b style="color:var(--brand)">{{ site.phone }}</b></a>
+    </div>
+  </nav>
+
+  <!-- Naslovnica -->
+  <header class="mg-cover" id="vrh" data-hero>
+    <div class="mg-wrap">
+      <p class="mg-topline"><span>{{ site.tagline }}</span><b>{{ site.city }}</b></p>
+      <h1 class="st-serif mg-title" aria-label="{{ site.name }}">
+        {% for w in site.name.split(" ") %}
+        <span class="mg-word" aria-hidden="true"><span style="--i:{{ loop.index0 }}">{{ w }}</span></span>
+        {% endfor %}
+      </h1>
+      <div class="mg-meta">
+        {% for f in site.facts %}<span><b>{{ f.n }}</b>{{ f.label }}</span>{% endfor %}
+      </div>
+      <p class="mg-lede">{{ site.about }}</p>
+      <div style="margin-top:2.2rem;display:flex;flex-wrap:wrap;gap:.9rem">
+        <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+        <a class="st-btn st-btn-ghost" href="#cenovnik">Cenovnik</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 01 O nama -->
+  <section class="mg-section" id="onama" style="padding-top:6rem">
+    <div class="mg-wrap">
+      <div class="mg-head rev"><span class="mg-num">01</span><p class="st-kicker">O nama</p></div>
+      <div class="mg-grid" style="margin-top:2rem">
+        <div class="mg-l rev">
+          <h2 class="st-serif mg-h2">Zanat star koliko i lepota.<br /><em>Pristup — nov.</em></h2>
+        </div>
+        <div class="mg-r-off rev" style="--d:.1s">
+          <p style="color:var(--s-muted);font-size:16px;line-height:1.75">{{ site.aboutLong }}</p>
+          <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:2.4rem">
+            {% for f in site.facts %}
+            <div>
+              <p class="st-serif" style="font-size:1.9rem;color:var(--brand)">{{ f.n }}</p>
+              <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s-muted);margin-top:.2rem">{{ f.label }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Cenovnik -->
+  <section class="mg-section" id="cenovnik">
+    <div class="mg-wrap">
+      <div class="mg-head rev"><span class="mg-num">02</span><p class="st-kicker">Cenovnik</p></div>
+      <div class="mg-grid" style="margin-top:2rem">
+        <div class="mg-l rev"><h2 class="st-serif mg-h2">Jasne cene.<br />Bez zvezdica.</h2></div>
+        <div class="mg-r rev" style="--d:.1s">
+          <div class="mg-price">
+            {% for s in services %}
+            <div class="mg-price-row">
+              <p class="mg-price-name">{{ s.name }}</p>
+              <p class="mg-price-val">{{ s.price }}</p>
+              <p class="mg-price-min">{{ s.durationMin }} min</p>
+            </div>
+            {% endfor %}
+          </div>
+          <p style="margin-top:1.2rem;font-size:13px;color:var(--s-muted)">Cene su informativne — za duge/gušće kose javi nam se porukom pre termina.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Galerija — horizontalna traka -->
+  <section class="mg-section" id="galerija" style="padding-inline:0">
+    <div class="mg-wrap">
+      <div class="mg-head rev" style="justify-content:space-between">
+        <div style="display:flex;align-items:baseline;gap:1.1rem"><span class="mg-num">03</span><p class="st-kicker">Galerija</p></div>
+        <p class="mg-hint" aria-hidden="true">prevuci →</p>
+      </div>
+    </div>
+    <div class="mg-strip rev">
+      {% for g in gallery %}
+      <figure class="st-tile">
+        <div class="st-tile-art" style="background:{{ g.art }}"></div>
+        <span class="st-tile-label">{{ g.label }}</span>
+      </figure>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 04 Tim -->
+  <section class="mg-section" id="tim">
+    <div class="mg-wrap">
+      <div class="mg-head rev"><span class="mg-num">04</span><p class="st-kicker">Tim</p></div>
+      <div style="margin-top:1.4rem">
+        {% for m in staff %}
+        <div class="mg-member rev" style="--d:{{ loop.index0 * 0.08 }}s">
+          <span class="st-avatar st-serif" style="background:{{ m.color }}">{{ m.initials }}</span>
+          <p class="mg-member-name">{{ m.name }}</p>
+          <p class="mg-member-role">{{ m.role }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Kontakt -->
+  <section class="mg-section" id="kontakt" style="padding-bottom:6rem">
+    <div class="mg-wrap">
+      <div class="mg-head rev"><span class="mg-num">05</span><p class="st-kicker">Kontakt</p></div>
+      <div class="mg-grid" style="margin-top:2rem">
+        <div class="mg-l rev">
+          <h2 class="st-serif mg-h2">Vidimo se<br /><em>u salonu.</em></h2>
+          <a class="mg-phone" style="display:inline-block;margin-top:1.4rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+          <p style="margin-top:1rem;color:var(--s-muted);font-size:15px;line-height:1.6">
+            <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+          </p>
+          <div style="margin-top:1.8rem;display:flex;flex-wrap:wrap;gap:.9rem">
+            <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Pozovi salon</a>
+            <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+          </div>
+        </div>
+        <div class="mg-r rev" style="--d:.1s">
+          <p class="st-kicker">Radno vreme</p>
+          <div style="margin-top:1rem;border-top:1px solid var(--s-line)">
+            {% for h in hours %}
+            <div class="mg-hours-row {% if h.today %}today{% endif %}">
+              <span>{{ h.label }}</span>
+              <span style="{% if not h.open %}color:var(--s-muted){% endif %}">{{ h.time }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{ shared.footer(site, year) }}
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+{% endblock %}

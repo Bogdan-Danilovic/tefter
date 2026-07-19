@@ -1,0 +1,220 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Cinema": svaka sekcija je pun ekran sa scroll-snap
+     (hero → o nama → cenovnik → galerija → kontakt), tačkasta navigacija
+     sa strane. Skroluje kontejner, ne body.
+     ==================================================================== */
+  .cn-scroll {
+    position: fixed; inset: 0; top: var(--demo-offset, 0);
+    overflow-y: auto; overflow-x: clip;
+    scroll-snap-type: y mandatory; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { .cn-scroll { scroll-behavior: auto; } }
+
+  .cn-slide {
+    min-height: 100%; scroll-snap-align: start; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 3.5rem 1.25rem; text-align: center; overflow: clip;
+  }
+  .cn-slide + .cn-slide { border-top: 1px solid var(--s-line); }
+  .cn-in { position: relative; width: 100%; max-width: 46rem; margin-inline: auto; }
+
+  /* vinjeta + dah aurore po slajdu */
+  .cn-glow { position: absolute; inset: 0; pointer-events: none; }
+  .cn-glow span { position: absolute; border-radius: 9999px; filter: blur(90px); }
+  .cn-glow span:nth-child(1) { width: 36rem; height: 36rem; left: -12rem; top: -12rem; background: radial-gradient(circle, var(--s-aurora1), transparent 65%); }
+  .cn-glow span:nth-child(2) { width: 30rem; height: 30rem; right: -10rem; bottom: -12rem; background: radial-gradient(circle, var(--s-aurora2), transparent 65%); }
+
+  .cn-h1 { font-size: clamp(3rem, 11vw, 7.5rem); line-height: 0.98; }
+  .cn-h1 em { font-style: italic; color: var(--brand); }
+  .cn-h2 { font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.06; }
+  .cn-h2 em { font-style: italic; color: var(--brand); }
+
+  /* tačkasta navigacija — meta 44px, tačka 8px */
+  .cn-dots {
+    position: fixed; right: 0.2rem; top: 50%; transform: translateY(-50%); z-index: 45;
+    display: flex; flex-direction: column;
+  }
+  .cn-dot { display: flex; align-items: center; justify-content: center; height: 44px; width: 44px; background: none; border: 0; cursor: pointer; }
+  .cn-dot span {
+    display: block; height: 8px; width: 8px; border-radius: 9999px;
+    background: color-mix(in srgb, var(--s-ink) 28%, transparent);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+  }
+  .cn-dot:hover span { background: color-mix(in srgb, var(--s-ink) 55%, transparent); }
+  .cn-dot.active span { background: var(--brand); transform: scale(1.7); }
+
+  /* cenovnik */
+  .cn-price-row { display: flex; align-items: baseline; gap: 0.9rem; padding: 0.85rem 0.15rem; border-bottom: 1px solid var(--s-line); text-align: left; }
+  .cn-price-row:last-child { border-bottom: 0; }
+  .cn-price-dots { flex: 1; border-bottom: 1px dotted color-mix(in srgb, var(--s-ink) 22%, transparent); transform: translateY(-4px); }
+  .cn-price-val { font-variant-numeric: tabular-nums; }
+  .cn-price-row:hover .cn-price-val { color: var(--brand); }
+
+  /* galerija slajd */
+  .cn-tiles { display: grid; gap: 0.7rem; grid-template-columns: repeat(2, 1fr); width: 100%; max-width: 58rem; }
+  @media (min-width: 820px) { .cn-tiles { grid-template-columns: repeat(3, 1fr); } }
+  .cn-tiles .st-tile { aspect-ratio: 4 / 5; }
+  @media (max-width: 819px) { .cn-tiles .st-tile:nth-child(n + 5) { display: none; } }
+
+  .cn-phone { font-family: var(--s-display); font-weight: var(--s-display-weight); font-size: clamp(2.2rem, 8vw, 4.5rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; font-variant-numeric: tabular-nums; }
+  .cn-phone:hover { color: var(--brand); }
+  .cn-hours { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.3rem 2rem; font-size: 13px; font-variant-numeric: tabular-nums; text-align: left; }
+  .cn-hours .today { color: var(--brand); font-weight: 600; }
+
+  .cn-hint { position: absolute; bottom: 1.4rem; left: 50%; transform: translateX(-50%); color: var(--s-muted); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; animation: cn-bob 2.2s ease-in-out infinite; }
+  @keyframes cn-bob { 50% { transform: translate(-50%, 6px); } }
+
+  /* footer unutar poslednjeg slajda */
+  .cn-slide .st-foot { position: absolute; bottom: 0; inset-inline: 0; border-top: 1px solid var(--s-line); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <!-- Tačkasta navigacija -->
+  <nav class="cn-dots" aria-label="Sekcije" id="cnDots">
+    <button class="cn-dot" data-slide="0" aria-label="Početna"><span></span></button>
+    <button class="cn-dot" data-slide="1" aria-label="O nama"><span></span></button>
+    <button class="cn-dot" data-slide="2" aria-label="Cenovnik"><span></span></button>
+    <button class="cn-dot" data-slide="3" aria-label="Galerija"><span></span></button>
+    <button class="cn-dot" data-slide="4" aria-label="Kontakt"><span></span></button>
+  </nav>
+
+  <div class="cn-scroll" id="cnScroll">
+
+    <!-- 1 · Hero -->
+    <header class="cn-slide" data-hero>
+      <div class="cn-glow" aria-hidden="true"><span></span><span></span></div>
+      <div class="cn-in">
+        <p class="st-kicker">{{ site.tagline }}</p>
+        <h1 class="st-serif cn-h1" style="margin-top:1.3rem">{{ site.name }}</h1>
+        <p style="margin-top:1.4rem;color:var(--s-muted);font-size:16px;line-height:1.65;max-width:30rem;margin-inline:auto">{{ site.about }}</p>
+        <div style="margin-top:2.4rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+          <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Zakaži termin</a>
+          <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+        </div>
+      </div>
+      <p class="cn-hint" aria-hidden="true">skroluj</p>
+    </header>
+
+    <!-- 2 · O nama -->
+    <section class="cn-slide">
+      <div class="cn-glow" aria-hidden="true"><span style="left:auto;right:-14rem;top:-14rem"></span><span style="right:auto;left:-12rem"></span></div>
+      <div class="cn-in">
+        <p class="st-kicker">O nama</p>
+        <h2 class="st-serif cn-h2" style="margin-top:1.1rem">Zanat star koliko i lepota.<br /><em>Pristup — nov.</em></h2>
+        <p style="margin-top:1.5rem;color:var(--s-muted);font-size:16px;line-height:1.75;max-width:36rem;margin-inline:auto">{{ site.aboutLong }}</p>
+        <div style="margin-top:2.4rem;display:flex;justify-content:center;flex-wrap:wrap;gap:2.6rem">
+          {% for f in site.facts %}
+          <div>
+            <p class="st-serif" style="font-size:2.1rem;color:var(--brand)">{{ f.n }}</p>
+            <p style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--s-muted);margin-top:.2rem">{{ f.label }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · Cenovnik -->
+    <section class="cn-slide">
+      <div class="cn-in" style="max-width:38rem">
+        <p class="st-kicker">Cenovnik</p>
+        <h2 class="st-serif cn-h2" style="margin-top:1.1rem">Jasne cene.<br />Bez zvezdica.</h2>
+        <div style="margin-top:1.8rem">
+          {% for s in services %}
+          <div class="cn-price-row">
+            <div>
+              <p style="font-size:15px">{{ s.name }}</p>
+              <p style="font-size:11px;color:var(--s-muted)">{{ s.durationMin }} min</p>
+            </div>
+            <span class="cn-price-dots" aria-hidden="true"></span>
+            <span class="cn-price-val">{{ s.price }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · Galerija -->
+    <section class="cn-slide">
+      <p class="st-kicker" style="margin-bottom:1.6rem">Galerija</p>
+      <div class="cn-tiles">
+        {% for g in gallery %}
+        <figure class="st-tile">
+          <div class="st-tile-art" style="background:{{ g.art }}"></div>
+          <span class="st-tile-label">{{ g.label }}</span>
+        </figure>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 5 · Kontakt -->
+    <section class="cn-slide">
+      <div class="cn-glow" aria-hidden="true"><span></span><span></span></div>
+      <div class="cn-in">
+        <p class="st-kicker">Kontakt</p>
+        <h2 class="st-serif cn-h2" style="margin-top:1rem">Vidimo se <em>u salonu.</em></h2>
+        <a class="cn-phone" style="display:inline-block;margin-top:1.2rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+        <p style="margin-top:.8rem;color:var(--s-muted);font-size:14px">
+          <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+        </p>
+        <div style="margin-top:1.8rem;display:inline-block;border-top:1px solid var(--s-line);padding-top:1.2rem">
+          <div class="cn-hours">
+            {% for h in hours %}
+            <span class="{% if h.today %}today{% endif %}" style="display:flex;justify-content:space-between;gap:1rem">
+              <span>{{ h.label.slice(0, 3) }}</span>
+              <span style="{% if not h.open %}color:var(--s-muted){% endif %}">{{ h.time }}</span>
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+        <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center">
+          <a class="st-btn st-btn-gold st-btn-shine" href="tel:{{ site.phoneRaw }}">Pozovi salon</a>
+          <a class="st-btn st-btn-ghost" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">@{{ site.instagram }}</a>
+        </div>
+      </div>
+      {{ shared.footer(site, year) }}
+    </section>
+
+  </div>
+
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+<script>
+  // Tačkasta navigacija: klik skroluje na slajd, aktivna tačka prati kontejner.
+  (function () {
+    var scroller = document.getElementById("cnScroll");
+    var slides = scroller.querySelectorAll(".cn-slide");
+    var dots = document.querySelectorAll("#cnDots .cn-dot");
+
+    dots.forEach(function (d) {
+      d.addEventListener("click", function () {
+        var s = slides[Number(d.dataset.slide)];
+        if (s) s.scrollIntoView(); // brzinu diktira CSS scroll-behavior (reduce → auto)
+      });
+    });
+
+    if (!("IntersectionObserver" in window)) { dots[0].classList.add("active"); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var idx = Array.prototype.indexOf.call(slides, e.target);
+        dots.forEach(function (d, i) { d.classList.toggle("active", i === idx); });
+      });
+    }, { root: scroller, threshold: 0.55 });
+    slides.forEach(function (s) { io.observe(s); });
+  })();
+</script>
+{% endblock %}

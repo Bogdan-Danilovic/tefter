@@ -1,0 +1,174 @@
+{% extends "marketing.njk" %}
+{% import "sites/_shared.njk" as shared %}
+{% block title %}{{ site.name }} — zakazivanje i cenovnik{% endblock %}
+
+{% block head %}
+{{ shared.themeStyle(theme, demo) }}
+<style>
+  /* ====================================================================
+     Izgled "Vizit": uska centrirana kolona kao digitalna vizit karta / meni —
+     logo krug, ime, dugmad, čist cenovnik. Savršeno za telefon i IG bio.
+     ==================================================================== */
+  .vz-col {
+    max-width: 30rem; margin-inline: auto;
+    padding: calc(var(--demo-offset, 0px) + 3.5rem) 1.25rem 4rem;
+    display: flex; flex-direction: column;
+  }
+  .vz-center { text-align: center; }
+
+  .vz-logo {
+    display: inline-flex; height: 5rem; width: 5rem; align-items: center; justify-content: center;
+    margin-inline: auto; border-radius: 9999px; font-size: 2rem; color: var(--brand);
+    border: 1px solid color-mix(in srgb, var(--brand) 55%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand) 8%, transparent);
+  }
+  .vz-name { margin-top: 1.3rem; font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.08; }
+  .vz-tag { margin-top: 0.5rem; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--s-muted); }
+
+  /* tri akcije — svaka meta ≥ 44px */
+  .vz-actions { margin-top: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+  .vz-action {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
+    min-height: 3.4rem; border-radius: var(--s-radius); border: 1px solid var(--s-line);
+    background: var(--s-surface); color: var(--s-ink); text-decoration: none; font-size: 13px; font-weight: 600;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, color 0.3s;
+  }
+  .vz-action:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--brand) 55%, transparent); color: var(--brand); }
+  .vz-action.primary { background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 90%, #fff), var(--brand)); color: var(--brand-ink); border-color: transparent; box-shadow: 0 8px 26px -10px color-mix(in srgb, var(--brand) 60%, transparent); }
+  .vz-action.primary:hover { color: var(--brand-ink); }
+  .vz-action small { font-size: 10px; font-weight: 400; opacity: 0.75; letter-spacing: 0.08em; }
+
+  /* separator sa zvezdicom */
+  .vz-sep { margin-block: 2.6rem; display: flex; align-items: center; gap: 1rem; color: var(--brand); }
+  .vz-sep::before, .vz-sep::after { content: ""; flex: 1; height: 1px; background: var(--s-line); }
+
+  .vz-kicker { text-align: center; }
+
+  /* cenovnik — čist spisak */
+  .vz-price-row { display: flex; align-items: baseline; gap: 0.8rem; padding: 0.95rem 0.1rem; border-bottom: 1px solid var(--s-line); }
+  .vz-price-row:last-child { border-bottom: 0; }
+  .vz-price-dots { flex: 1; border-bottom: 1px dotted color-mix(in srgb, var(--s-ink) 22%, transparent); transform: translateY(-4px); }
+  .vz-price-val { font-variant-numeric: tabular-nums; font-size: 15px; }
+  .vz-price-row:hover .vz-price-val { color: var(--brand); }
+
+  /* galerija — mini mreža 3×2 */
+  .vz-gal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
+  .vz-gal .st-tile { aspect-ratio: 1 / 1; border-radius: calc(var(--s-radius) * 0.7); }
+  .vz-gal .st-tile-label { display: none; }
+  .vz-gal .st-tile::after { background: linear-gradient(180deg, transparent 70%, rgba(0, 0, 0, 0.25)); }
+
+  /* tim + radno vreme */
+  .vz-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.1rem; }
+  .vz-hours-row { display: flex; justify-content: space-between; padding: 0.55rem 0.1rem; font-size: 14px; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--s-line); }
+  .vz-hours-row:last-child { border-bottom: 0; }
+  .vz-hours-row.today { color: var(--brand); font-weight: 600; }
+
+  .vz-phone { font-variant-numeric: tabular-nums; font-size: clamp(1.7rem, 7vw, 2.2rem); color: var(--s-ink); text-decoration: none; transition: color 0.3s; }
+  .vz-phone:hover { color: var(--brand); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="site st-grain">
+
+  {% if demo %}{{ shared.demoBar(layoutList, themeList, layout, theme) }}{% endif %}
+
+  <div class="vz-col">
+
+    <!-- Vizit zaglavlje -->
+    <header class="vz-center" data-hero>
+      <span class="vz-logo st-serif">{{ site.name[0] }}</span>
+      <h1 class="st-serif vz-name">{{ site.name }}</h1>
+      <p class="vz-tag">{{ site.tagline }}</p>
+      <p style="margin-top:1.2rem;color:var(--s-muted);font-size:14px;line-height:1.65">{{ site.about }}</p>
+
+      <div class="vz-actions">
+        <a class="vz-action primary" href="tel:{{ site.phoneRaw }}">Pozovi<small>{{ site.phone }}</small></a>
+        <a class="vz-action" href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener">Mapa<small>{{ site.city }}</small></a>
+        <a class="vz-action" href="https://instagram.com/{{ site.instagram }}" target="_blank" rel="noopener">Instagram<small>@{{ site.instagram }}</small></a>
+      </div>
+    </header>
+
+    <div class="vz-sep" aria-hidden="true">✦</div>
+
+    <!-- Cenovnik -->
+    <section class="rev">
+      <p class="st-kicker vz-kicker">Cenovnik</p>
+      <div style="margin-top:1.2rem">
+        {% for s in services %}
+        <div class="vz-price-row">
+          <div>
+            <p style="font-size:15px">{{ s.name }}</p>
+            <p style="font-size:11px;color:var(--s-muted)">{{ s.durationMin }} min</p>
+          </div>
+          <span class="vz-price-dots" aria-hidden="true"></span>
+          <span class="vz-price-val">{{ s.price }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="vz-sep" aria-hidden="true">✦</div>
+
+    <!-- Galerija -->
+    <section class="rev">
+      <p class="st-kicker vz-kicker">Galerija</p>
+      <div class="vz-gal" style="margin-top:1.2rem">
+        {% for g in gallery %}
+        <figure class="st-tile"><div class="st-tile-art" style="background:{{ g.art }}"></div></figure>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="vz-sep" aria-hidden="true">✦</div>
+
+    <!-- Tim -->
+    <section class="rev">
+      <p class="st-kicker vz-kicker">Tim</p>
+      <div style="margin-top:.9rem">
+        {% for m in staff %}
+        <div class="vz-row">
+          <span class="st-avatar st-serif" style="background:{{ m.color }};height:2.8rem;width:2.8rem;font-size:14px">{{ m.initials }}</span>
+          <span style="flex:1">
+            <p style="font-size:15px;font-weight:600">{{ m.name }}</p>
+            <p style="font-size:12px;color:var(--s-muted)">{{ m.role }}</p>
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="vz-sep" aria-hidden="true">✦</div>
+
+    <!-- Radno vreme -->
+    <section class="rev">
+      <p class="st-kicker vz-kicker">Radno vreme</p>
+      <div style="margin-top:1rem">
+        {% for h in hours %}
+        <div class="vz-hours-row {% if h.today %}today{% endif %}">
+          <span>{{ h.label }}</span>
+          <span style="{% if not h.open %}color:var(--s-muted){% endif %}">{{ h.time }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="vz-sep" aria-hidden="true">✦</div>
+
+    <!-- Kontakt -->
+    <section class="vz-center rev">
+      <p class="st-kicker">Vidimo se u salonu</p>
+      <a class="st-serif vz-phone" style="display:inline-block;margin-top:.9rem" href="tel:{{ site.phoneRaw }}">{{ site.phone }}</a>
+      <p style="margin-top:.6rem;font-size:13px;color:var(--s-muted)">
+        <a href="https://www.google.com/maps/search/{{ site.address | urlencode }}" target="_blank" rel="noopener" style="color:inherit">{{ site.address }}</a>
+      </p>
+    </section>
+
+  </div>
+
+  {{ shared.footer(site, year) }}
+  {{ shared.ctaBar(site) }}
+</div>
+
+{{ shared.baseJs() }}
+{% endblock %}
