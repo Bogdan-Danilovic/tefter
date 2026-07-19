@@ -80,28 +80,36 @@
     background: theme("colors.now");
   }
   .cal-card {
-    @apply absolute z-10 flex overflow-hidden rounded-lg bg-surface text-left shadow-card ring-1 ring-line transition;
+    @apply absolute z-10 flex overflow-hidden rounded-lg text-left shadow-card ring-1 ring-line transition;
+    /* blaga nijansa boje radnika da kartica ne bude prazna bela ploha */
+    background: color-mix(in srgb, var(--staff, theme("colors.muted")) 10%, theme("colors.surface"));
   }
   .cal-card:hover {
     @apply ring-line-strong;
     transform: translateY(-1px);
   }
+  .cal-card::after {
+    content: "";
+    @apply pointer-events-none absolute -bottom-6 -right-6 h-24 w-24 rounded-full;
+    background: var(--staff, theme("colors.muted"));
+    opacity: 0.14;
+  }
   .cal-card-accent {
     @apply flex-none;
-    width: 3px;
+    width: 4px;
     background: var(--staff, theme("colors.muted"));
   }
   .cal-card-body {
-    @apply min-w-0 px-2 py-1;
+    @apply min-w-0 px-2.5 py-1.5;
   }
   .cal-card-time {
-    @apply block text-[11px] tabular-nums text-muted;
+    @apply block text-xs tabular-nums text-muted;
   }
   .cal-card-client {
-    @apply block truncate text-[13px] font-medium leading-tight;
+    @apply block truncate text-[15px] font-semibold leading-tight;
   }
   .cal-card-service {
-    @apply block truncate text-[11px] text-muted;
+    @apply mt-0.5 block truncate text-[13px] text-muted;
   }
 
   /* --- week strip ------------------------------------------------------- */
