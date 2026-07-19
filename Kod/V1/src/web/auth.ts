@@ -14,10 +14,18 @@ const SECRET = process.env.SESSION_SECRET;
 if (!SECRET) throw new Error("SESSION_SECRET nije postavljen");
 const secret: string = SECRET;
 
-/** onRequest hook (globalno): pročitaj i verifikuj session cookie za svaki request. */
-export async function sessionHook(req: FastifyRequest) {
+/**
+ * onRequest hook (globalno): pročitaj i verifikuj session cookie za svaki request.
+ * Klizno produžavanje: dok god se aplikacija koristi, rok se pomera na novih
+ * 30 dana — osvežavamo najviše jednom dnevno da ne pišemo cookie na svaki zahtev.
+ */
+export async function sessionHook(req: FastifyRequest, reply: FastifyReply) {
   const token = parseCookieHeader(req.headers.cookie)[COOKIE_NAME];
   req.session = token ? openSession(token, secret) : null;
+  if (req.session && req.session.exp < Date.now() + (MAX_AGE_S - 24 * 3600) * 1000) {
+    const { exp: _exp, ...data } = req.session;
+    setSessionCookie(reply, data);
+  }
 }
 
 export function setSessionCookie(
