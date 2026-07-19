@@ -6,6 +6,7 @@
   <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
     <a href="/" class="text-[19px] font-semibold tracking-tight">Tefter<span class="text-now">.</span></a>
     <nav class="flex items-center gap-1">
+      <a href="/sajt-demo?izgled=svila&tema=puder" class="btn btn-ghost hidden sm:inline-flex">Primeri sajtova</a>
       {% if session %}
       <a href="/s/{{ session.slug }}/day" class="btn btn-primary">Otvori aplikaciju</a>
       {% else %}
@@ -157,6 +158,37 @@
   </div>
 </section>
 
+<!-- ── Mini sajt: izlog izgleda i tema ───────────────────────────────────── -->
+<section id="mini-sajt" class="mx-auto max-w-5xl px-5 py-6">
+  <h2 class="text-[26px] font-semibold tracking-tight sm:text-[32px]">Dobiješ i mini sajt salona</h2>
+  <p class="mt-2 max-w-2xl text-[15px] text-muted">
+    Cenovnik, galerija, radno vreme i dugme za zakazivanje — na tvom linku. Izabereš
+    izgled i boje koje ti liče, a podaci se povlače iz Teftera pa je sajt uvek ažuran.
+  </p>
+
+  <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+    {% for c in showcase %}
+    <a href="{{ c.href }}" class="group overflow-hidden rounded-2xl border border-line transition hover:-translate-y-1 hover:shadow-modal" style="background:{{ c.bg }}">
+      <div class="p-3.5">
+        <div class="rounded-xl p-3.5 shadow-card" style="background:{{ c.surface }}">
+          <span class="inline-block h-2.5 w-2.5 rounded-full" style="background:{{ c.brand }}"></span>
+          <p class="mt-2 text-[15px]" style="color:{{ c.ink }};font-family:Georgia,serif">Studio Šarm</p>
+          <div class="mt-2.5 h-1.5 w-16 max-w-full rounded-full opacity-40" style="background:{{ c.ink }}"></div>
+          <div class="mt-1.5 h-1.5 w-10 max-w-full rounded-full opacity-25" style="background:{{ c.ink }}"></div>
+        </div>
+        <p class="mt-3 text-[13px] font-semibold" style="color:{{ c.ink }}">{{ c.label }}</p>
+        <p class="text-[11px]" style="color:{{ c.ink }};opacity:.65">{{ c.sub }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+    <a href="/sajt-demo?izgled=svila&tema=puder" class="btn btn-primary h-12 px-6 text-[15px] sm:h-12">Pogledaj sve primere</a>
+    <p class="self-center text-xs text-muted">12 izgleda × 20 tema — sve kombinacije možeš da probaš uživo.</p>
+  </div>
+</section>
+
 <!-- ── Cenovnik ──────────────────────────────────────────────────────────── -->
 <section id="cenovnik" class="mx-auto max-w-5xl px-5 py-6">
   <h2 class="text-[26px] font-semibold tracking-tight sm:text-[32px]">Cena</h2>
@@ -227,8 +259,9 @@
 <footer class="border-t border-line">
   <div class="mx-auto flex max-w-5xl flex-col gap-3 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
     <p class="font-medium text-ink">Tefter<span class="text-now">.</span></p>
-    <nav class="flex gap-5">
+    <nav class="flex flex-wrap gap-5">
       <a href="#cenovnik" class="hover:text-ink">Cenovnik</a>
+      <a href="/sajt-demo?izgled=svila&tema=puder" class="hover:text-ink">Primeri sajtova</a>
       <a href="/prijava" class="hover:text-ink">Prijava</a>
       <a href="/registracija" class="hover:text-ink">Registracija</a>
     </nav>

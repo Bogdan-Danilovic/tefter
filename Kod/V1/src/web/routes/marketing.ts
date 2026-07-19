@@ -140,6 +140,33 @@ function originOf(req: FastifyRequest): string {
   return `${proto}://${req.headers.host ?? "tefter.rs"}`;
 }
 
+/**
+ * Izlog mini sajta na landing-u: ručno birane kombinacije izgled+tema koje
+ * vode u /sajt-demo. Boje se čitaju iz SITE_THEMES da kartice uvek prate temu.
+ */
+const SHOWCASE: { layout: string; theme: string; sub: string }[] = [
+  { layout: "svila", theme: "puder", sub: "Talasi i latice" },
+  { layout: "album", theme: "breskva", sub: "Polaroid album" },
+  { layout: "arkada", theme: "lila", sub: "Elegantni lukovi" },
+  { layout: "ritual", theme: "menta", sub: "Spa jutro" },
+];
+
+function showcaseCards() {
+  return SHOWCASE.map((c) => {
+    const t = safeTheme(c.theme);
+    const l = safeLayout(c.layout);
+    return {
+      href: `/sajt-demo?izgled=${l.key}&tema=${t.key}`,
+      label: `${l.label} · ${t.label}`,
+      sub: c.sub,
+      bg: t.bg,
+      surface: t.surface,
+      ink: t.ink,
+      brand: t.brand,
+    };
+  });
+}
+
 export async function marketingRoutes(app: FastifyInstance) {
   app.get("/", (req, reply) => {
     const origin = originOf(req);
@@ -150,6 +177,7 @@ export async function marketingRoutes(app: FastifyInstance) {
 
     return reply.view("landing.njk", {
       session: req.session,
+      showcase: showcaseCards(),
       pricing: PRICING,
       freeFeatures: FREE_FEATURES,
       proFeatures: PRO_FEATURES,

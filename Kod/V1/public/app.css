@@ -1372,12 +1372,20 @@ body {
   margin-top: 0.25rem;
 }
 
+.mt-1\.5 {
+  margin-top: 0.375rem;
+}
+
 .mt-10 {
   margin-top: 2.5rem;
 }
 
 .mt-2 {
   margin-top: 0.5rem;
+}
+
+.mt-2\.5 {
+  margin-top: 0.625rem;
 }
 
 .mt-3 {
@@ -1410,6 +1418,10 @@ body {
 
 .block {
   display: block;
+}
+
+.inline-block {
+  display: inline-block;
 }
 
 .flex {
@@ -1524,6 +1536,10 @@ body {
   width: 0.375rem;
 }
 
+.w-10 {
+  width: 2.5rem;
+}
+
 .w-16 {
   width: 4rem;
 }
@@ -1594,6 +1610,10 @@ body {
 
 .max-w-\[280px\] {
   max-width: 280px;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .max-w-lg {
@@ -1749,6 +1769,10 @@ body {
 
 .self-start {
   align-self: flex-start;
+}
+
+.self-center {
+  align-self: center;
 }
 
 .overflow-hidden {
@@ -1934,6 +1958,10 @@ body {
 
 .p-3 {
   padding: 0.75rem;
+}
+
+.p-3\.5 {
+  padding: 0.875rem;
 }
 
 .p-4 {
@@ -2316,6 +2344,14 @@ body {
   accent-color: #1b1a18;
 }
 
+.opacity-25 {
+  opacity: 0.25;
+}
+
+.opacity-40 {
+  opacity: 0.4;
+}
+
 .opacity-55 {
   opacity: 0.55;
 }
@@ -2411,6 +2447,11 @@ body {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
+.hover\:-translate-y-1:hover {
+  --tw-translate-y: -0.25rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .hover\:bg-now\/\[0\.08\]:hover {
   background-color: rgb(209 72 58 / 0.08);
 }
@@ -2418,6 +2459,12 @@ body {
 .hover\:text-ink:hover {
   --tw-text-opacity: 1;
   color: rgb(27 26 24 / var(--tw-text-opacity, 1));
+}
+
+.hover\:shadow-modal:hover {
+  --tw-shadow: 0 12px 48px rgba(27,26,24,0.20);
+  --tw-shadow-colored: 0 12px 48px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .active\:bg-line\/40:active {
@@ -2439,6 +2486,10 @@ body {
     display: block;
   }
 
+  .sm\:inline-flex {
+    display: inline-flex;
+  }
+
   .sm\:h-12 {
     height: 3rem;
   }
@@ -2453,6 +2504,10 @@ body {
 
   .sm\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sm\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .sm\:flex-row {
