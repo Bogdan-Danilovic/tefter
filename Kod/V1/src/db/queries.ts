@@ -12,8 +12,8 @@ export type DayAppointment = {
   endsAt: Date;
   price: number;
   note: string | null;
-  clientId: string;
-  clientName: string;
+  clientId: string | null;
+  clientName: string | null;
   serviceId: string;
   serviceName: string;
   staffId: string | null;

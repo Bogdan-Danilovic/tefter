@@ -133,7 +133,7 @@ export async function buildDayContext(tx: Tx, salon: Salon, date: string): Promi
       heightPx: Math.max(((p.endMin - p.startMin) / SLOT_MIN) * SLOT_PX - 2, MIN_CARD_PX),
       leftPct: p.lane * widthPct,
       widthPct,
-      clientName: p.appt.clientName ?? "—",
+      clientName: p.appt.clientName ?? "Bez klijenta",
       serviceName: p.appt.serviceName ?? "—",
       staffName: p.appt.staffName ?? "Bilo ko",
       staffColor: p.appt.staffColor ?? "#94a3b8",

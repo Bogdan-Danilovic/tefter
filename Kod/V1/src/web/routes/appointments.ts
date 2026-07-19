@@ -83,7 +83,7 @@ async function save(
   if (!/^\d{2}:\d{2}$/.test(startTime)) errors.startTime = "Neispravno vreme";
   if (!serviceId || !Number.isInteger(durationMin) || durationMin <= 0)
     errors.service = "Izaberi uslugu";
-  if (!clientId && !newClientName) errors.client = "Izaberi ili dodaj klijenta";
+  // Klijent je opcion — prazno polje pravi termin "Bez klijenta" (prolaznik).
   if (!clientId && newClientName && !newClientPhone) errors.clientPhone = "Telefon je obavezan";
   const priceMinor = parseRsdToMinor(priceRaw);
   if (priceMinor === null) errors.price = "Unesi cenu";
@@ -124,13 +124,13 @@ async function save(
       return { ok: false as const, field: { service: "Nepoznata usluga" } as Record<string, string> };
     }
 
-    let resolvedClientId = clientId;
+    let resolvedClientId: string | null = clientId || null;
     if (clientId) {
       const c = await clientById(tx, salon.id, clientId);
       if (!c) {
         return { ok: false as const, field: { client: "Nepoznat klijent" } as Record<string, string> };
       }
-    } else {
+    } else if (newClientName) {
       const c = await createClient(tx, salon.id, {
         fullName: newClientName,
         phone: newClientPhone,

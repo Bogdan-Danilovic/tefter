@@ -154,9 +154,8 @@ export const appointments = pgTable(
     salonId: uuid("salon_id")
       .notNull()
       .references(() => salons.id, { onDelete: "cascade" }),
-    clientId: uuid("client_id")
-      .notNull()
-      .references(() => clients.id, { onDelete: "restrict" }),
+    // nullable = termin bez klijenta ("prolaznik") — kartica kaže "Bez klijenta".
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "restrict" }),
     serviceId: uuid("service_id")
       .notNull()
       .references(() => services.id, { onDelete: "restrict" }),

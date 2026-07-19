@@ -74,7 +74,7 @@ export async function buildEditModal(
 ): Promise<ModalContext> {
   const tz = salon.timezone;
   const { services, staffList } = await catalog(tx, salon);
-  const client = await clientById(tx, salon.id, appt.clientId);
+  const client = appt.clientId ? await clientById(tx, salon.id, appt.clientId) : null;
   const startMin = minutesInTz(appt.startsAt, tz);
   const durationMin = Math.max(
     Math.round((appt.endsAt.getTime() - appt.startsAt.getTime()) / 60000),
@@ -92,7 +92,7 @@ export async function buildEditModal(
     durationMin,
     services,
     staffList,
-    clientMode: "selected",
+    clientMode: client ? "selected" : "search",
     selectedClient: client ? { id: client.id, name: client.fullName, phone: client.phone } : null,
     newClient: { name: "", phone: "" },
     values: {
