@@ -48,6 +48,11 @@
   }
 
   /* --- kalendar --------------------------------------------------------- */
+  /* pan-y: browser zadržava vertikalni skrol, a pinch sa dva prsta ostaje
+     nama (dayScroll) za zumiranje vremenske ose umesto zuma cele strane */
+  #day-scroll {
+    touch-action: pan-y;
+  }
   .cal {
     @apply relative grid;
     grid-template-columns: 3.25rem 1fr;
@@ -83,6 +88,9 @@
     @apply absolute z-10 flex overflow-hidden rounded-lg text-left shadow-card ring-1 ring-line transition;
     /* blaga nijansa boje radnika da kartica ne bude prazna bela ploha */
     background: color-mix(in srgb, var(--staff, theme("colors.muted")) 10%, theme("colors.surface"));
+    /* kartica je container da bi kratki termini automatski prešli na zbijen
+       raspored (ime + vreme u istom redu) — i obrnuto kad se mreža zumira */
+    container-type: size;
   }
   .cal-card:hover {
     @apply ring-line-strong;
@@ -99,17 +107,36 @@
     width: 4px;
     background: var(--staff, theme("colors.muted"));
   }
+  /* podrazumevano (kratke kartice): ime + vreme u istom redu, usluga ispod */
   .cal-card-body {
-    @apply min-w-0 px-2.5 py-1.5;
+    @apply flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 px-2.5 py-1;
+    align-content: flex-start;
   }
   .cal-card-time {
-    @apply block text-xs tabular-nums text-muted;
+    @apply text-xs tabular-nums text-muted;
   }
   .cal-card-client {
-    @apply block truncate text-[15px] font-semibold leading-tight;
+    @apply order-first truncate text-[15px] font-semibold leading-tight;
+    max-width: 100%;
   }
   .cal-card-service {
-    @apply mt-0.5 block truncate text-[13px] text-muted;
+    @apply w-full truncate text-[13px] text-muted;
+  }
+  /* dovoljno visoka kartica (≥ 1h ili zumirano): pun raspored u tri reda */
+  @container (min-height: 5rem) {
+    .cal-card-body {
+      @apply block py-1.5;
+    }
+    .cal-card-client {
+      @apply block;
+    }
+    .cal-card-time,
+    .cal-card-service {
+      @apply block;
+    }
+    .cal-card-service {
+      @apply mt-0.5;
+    }
   }
 
   /* --- week strip ------------------------------------------------------- */

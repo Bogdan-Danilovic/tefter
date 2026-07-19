@@ -736,6 +736,13 @@ body {
 
 /* --- kalendar --------------------------------------------------------- */
 
+/* pan-y: browser zadržava vertikalni skrol, a pinch sa dva prsta ostaje
+     nama (dayScroll) za zumiranje vremenske ose umesto zuma cele strane */
+
+#day-scroll {
+  touch-action: pan-y;
+}
+
 .cal {
   position: relative;
   display: grid;
@@ -827,6 +834,9 @@ body {
   transition-duration: 150ms;
   /* blaga nijansa boje radnika da kartica ne bude prazna bela ploha */
   background: color-mix(in srgb, var(--staff, #6f6b64) 10%, #ffffff);
+  /* kartica je container da bi kratki termini automatski prešli na zbijen
+       raspored (ime + vreme u istom redu) — i obrnuto kad se mreža zumira */
+  container-type: size;
 }
 
 .cal-card:hover {
@@ -854,16 +864,24 @@ body {
   background: var(--staff, #6f6b64);
 }
 
+/* podrazumevano (kratke kartice): ime + vreme u istom redu, usluga ispod */
+
 .cal-card-body {
+  display: flex;
   min-width: 0px;
+  flex: 1 1 0%;
+  flex-wrap: wrap;
+  align-items: baseline;
+  -moz-column-gap: 0.5rem;
+       column-gap: 0.5rem;
   padding-left: 0.625rem;
   padding-right: 0.625rem;
-  padding-top: 0.375rem;
-  padding-bottom: 0.375rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  align-content: flex-start;
 }
 
 .cal-card-time {
-  display: block;
   font-size: 0.75rem;
   line-height: 1rem;
   --tw-numeric-spacing: tabular-nums;
@@ -873,24 +891,47 @@ body {
 }
 
 .cal-card-client {
-  display: block;
+  order: -9999;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.25;
+  max-width: 100%;
 }
 
 .cal-card-service {
-  margin-top: 0.125rem;
-  display: block;
+  width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
   --tw-text-opacity: 1;
   color: rgb(111 107 100 / var(--tw-text-opacity, 1));
+}
+
+/* dovoljno visoka kartica (≥ 1h ili zumirano): pun raspored u tri reda */
+
+@container (min-height: 5rem) {
+  .cal-card-body {
+    display: block;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  .cal-card-client {
+    display: block;
+  }
+
+  .cal-card-time,
+    .cal-card-service {
+    display: block;
+  }
+
+  .cal-card-service {
+    margin-top: 0.125rem;
+  }
 }
 
 /* --- week strip ------------------------------------------------------- */

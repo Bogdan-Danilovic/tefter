@@ -88,30 +88,76 @@ document.addEventListener("alpine:init", () => {
     },
   }));
 
-  // Skrol kontejner dnevnog prikaza — auto-scroll na "sada" + swipe levo/desno menja dan.
+  // Skrol kontejner dnevnog prikaza — auto-scroll na "sada", swipe levo/desno
+  // menja dan, pinch sa dva prsta zumira vremensku osu (množi --zoom u mreži).
   window.Alpine.data("dayScroll", (opts) => ({
     touchX: 0,
     touchY: 0,
+    zoom: 1,
+    pinchDist: 0,
+    pinchZoom0: 1,
+    didPinch: false,
+    applyZoom(z) {
+      this.zoom = Math.min(2.5, Math.max(0.75, z));
+      this.$el.style.setProperty("--zoom", this.zoom);
+    },
     init() {
+      const saved = parseFloat(localStorage.getItem("tefter-day-zoom") || "");
+      if (saved) this.applyZoom(saved);
+
       if (opts.showNow) {
         this.$nextTick(() => {
-          const target = Math.max(opts.nowTopPx - this.$el.clientHeight / 2, 0);
+          const target = Math.max(opts.nowTopPx * this.zoom - this.$el.clientHeight / 2, 0);
           this.$el.scrollTo({ top: target, behavior: "instant" });
         });
       }
 
-      // Swipe: horizontalna namera (|dx| > 60px i bar 2x veća od |dy|).
       this.$el.addEventListener(
         "touchstart",
         (e) => {
+          if (e.touches.length === 2) {
+            this.didPinch = true;
+            this.pinchDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY,
+            );
+            this.pinchZoom0 = this.zoom;
+            return;
+          }
+          this.didPinch = false;
           this.touchX = e.touches[0].clientX;
           this.touchY = e.touches[0].clientY;
         },
         { passive: true },
       );
+
+      // Pinch mora biti non-passive da preventDefault() spreči zum cele strane.
+      this.$el.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length !== 2 || !this.pinchDist) return;
+          e.preventDefault();
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY,
+          );
+          const prev = this.zoom;
+          this.applyZoom(this.pinchZoom0 * (dist / this.pinchDist));
+          // Zadrži tačku između prstiju na istom mestu ekrana.
+          const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - this.$el.getBoundingClientRect().top;
+          this.$el.scrollTop = (this.$el.scrollTop + cy) * (this.zoom / prev) - cy;
+        },
+        { passive: false },
+      );
+
+      // Swipe: horizontalna namera (|dx| > 60px i bar 2x veća od |dy|).
       this.$el.addEventListener(
         "touchend",
         (e) => {
+          if (this.didPinch) {
+            if (e.touches.length === 0) localStorage.setItem("tefter-day-zoom", String(this.zoom));
+            return;
+          }
           const dx = e.changedTouches[0].clientX - this.touchX;
           const dy = e.changedTouches[0].clientY - this.touchY;
           if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;

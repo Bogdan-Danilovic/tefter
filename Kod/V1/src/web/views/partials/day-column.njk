@@ -4,10 +4,12 @@
     <p class="text-[13px] text-muted">Izaberi drugi dan iz navigacije.</p>
   </div>
 {% else %}
-  <div class="cal px-3 py-2" style="height: {{ day.gridHeightPx + 16 }}px">
+  {# Sve pozicije se množe sa var(--zoom) — pinch sa dva prsta (dayScroll)
+     razvlači vremensku osu bez ponovnog rendera. #}
+  <div class="cal px-3 py-2" style="height: calc({{ day.gridHeightPx }}px * var(--zoom, 1) + 16px)">
     <div class="cal-gutter">
       {% for h in day.hourLabels %}
-        <div class="cal-hour-label" style="top: {{ h.topPx + 8 }}px">{{ h.label }}</div>
+        <div class="cal-hour-label" style="top: calc({{ h.topPx }}px * var(--zoom, 1) + 8px)">{{ h.label }}</div>
       {% endfor %}
     </div>
 
@@ -15,19 +17,19 @@
       {% for s in day.slots %}
         <button type="button"
           class="cal-slot {% if s.isHour %}cal-slot-hour{% endif %}"
-          style="top: {{ s.topPx }}px; height: {{ s.heightPx }}px"
+          style="top: calc({{ s.topPx }}px * var(--zoom, 1)); height: calc({{ s.heightPx }}px * var(--zoom, 1))"
           hx-get="/s/{{ day.slug }}/appointments/new?start={{ s.startParam }}"
           hx-target="#modal" hx-swap="innerHTML"
           aria-label="Novi termin"></button>
       {% endfor %}
 
       {% if day.showNow %}
-        <div class="cal-now" style="top: {{ day.nowTopPx }}px"></div>
+        <div class="cal-now" style="top: calc({{ day.nowTopPx }}px * var(--zoom, 1))"></div>
       {% endif %}
 
       {% for c in day.cards %}
         <button type="button" class="cal-card"
-          style="top: {{ c.topPx }}px; height: {{ c.heightPx }}px; left: calc({{ c.leftPct }}% + 2px); width: calc({{ c.widthPct }}% - 4px); --staff: {{ c.staffColor }}"
+          style="top: calc({{ c.topPx }}px * var(--zoom, 1)); height: calc({{ c.heightPx }}px * var(--zoom, 1)); left: calc({{ c.leftPct }}% + 2px); width: calc({{ c.widthPct }}% - 4px); --staff: {{ c.staffColor }}"
           hx-get="/s/{{ day.slug }}/appointments/{{ c.id }}/edit"
           hx-target="#modal" hx-swap="innerHTML">
           <span class="cal-card-accent"></span>
