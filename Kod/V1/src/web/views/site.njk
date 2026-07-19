@@ -4,22 +4,34 @@
 {% block head %}
 <style>
   /* ====================================================================
-     Mini sajt salona — tema "Noć" (Faza 9 demo).
-     Sve je u .st-* prostoru da ne dira app stilove; boja salona je --brand.
+     Mini sajt salona (Faza 9). Cela tema su CSS varijable ispod — vrednosti
+     stižu iz src/web/site-themes.ts, template i CSS su isti za sve teme.
      ==================================================================== */
   .site {
-    --brand: {{ site.brandColor }};
-    --s-bg: #0e0c09;
-    --s-surface: #16130f;
-    --s-ink: #f4efe7;
-    --s-muted: rgba(244, 239, 231, 0.55);
-    --s-line: rgba(244, 239, 231, 0.09);
+    --brand: {{ theme.brand }};
+    --brand-ink: {{ theme.brandInk }};
+    --s-bg: {{ theme.bg }};
+    --s-surface: {{ theme.surface }};
+    --s-ink: {{ theme.ink }};
+    --s-muted: {{ theme.muted }};
+    --s-line: {{ theme.line }};
+    {# | safe: autoescape bi navodnike u font stack-u ("Times New Roman") pretvorio
+       u &quot; koji u <style> ostaje bukvalno → ceo font-family pada na sans.
+       Vrednost je konstanta iz site-themes.ts (SERIF/SANS), ne korisnički unos. #}
+    --s-display: {{ theme.display | safe }};
+    --s-display-weight: {{ theme.displayWeight }};
+    --s-display-tracking: {{ theme.displayTracking }};
+    --s-radius: {{ theme.radius }};
+    --s-grain: {{ theme.grain }};
+    --s-aurora1: {{ theme.aurora[0] }};
+    --s-aurora2: {{ theme.aurora[1] }};
+    --s-aurora3: {{ theme.aurora[2] }};
     background: var(--s-bg);
     color: var(--s-ink);
     overflow-x: clip;
     scroll-behavior: smooth;
   }
-  .st-serif { font-family: Georgia, "Times New Roman", serif; letter-spacing: -0.01em; }
+  .st-serif { font-family: var(--s-display); font-weight: var(--s-display-weight); letter-spacing: var(--s-display-tracking); }
   .st-kicker {
     font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase;
     color: var(--brand); font-weight: 600;
@@ -28,19 +40,37 @@
 
   /* --- zrno (noise) preko cele strane — daje "print" teksturu ---------- */
   .st-grain::before {
-    content: ""; position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.5;
+    content: ""; position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: var(--s-grain);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   .site > * { position: relative; z-index: 2; }
 
+  /* --- demo traka za biranje teme (samo na /sajt-demo) ------------------ */
+  .st-demo-bar {
+    position: fixed; inset-inline: 0; top: 0; z-index: 60; height: 2.75rem;
+    display: flex; align-items: center; gap: 0.6rem; overflow-x: auto; padding-inline: 1rem;
+    background: #0b0b0c; color: rgba(255, 255, 255, 0.85); font-size: 12px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .st-demo-bar::-webkit-scrollbar { display: none; }
+  .st-demo-chip {
+    display: inline-flex; align-items: center; gap: 0.45rem; flex: none;
+    padding: 0.32rem 0.75rem; border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.18);
+    color: inherit; text-decoration: none; transition: border-color 0.25s, background 0.25s;
+  }
+  .st-demo-chip:hover { border-color: rgba(255, 255, 255, 0.5); }
+  .st-demo-chip.active { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
+  .st-demo-dot { height: 0.7rem; width: 0.7rem; border-radius: 9999px; border: 1px solid rgba(0, 0, 0, 0.2); }
+  {% if demo %}.site { --demo-offset: 2.75rem; }{% endif %}
+
   /* --- navigacija ------------------------------------------------------- */
   .st-nav {
-    position: fixed; inset-inline: 0; top: 0; z-index: 50;
+    position: fixed; inset-inline: 0; top: var(--demo-offset, 0); z-index: 50;
     transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
     border-bottom: 1px solid transparent;
   }
   .st-nav.scrolled {
-    background: rgba(14, 12, 9, 0.72); backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--s-bg) 78%, transparent); backdrop-filter: blur(14px);
     border-color: var(--s-line);
   }
   .st-logo {
@@ -68,12 +98,13 @@
   }
   .st-btn:active { transform: scale(0.97); }
   .st-btn-gold {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 92%, #fff), var(--brand));
-    color: #191510; box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--brand) 55%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 90%, #fff), var(--brand));
+    color: var(--brand-ink); box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--brand) 55%, transparent);
   }
   .st-btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -10px color-mix(in srgb, var(--brand) 70%, transparent); }
   .st-btn-ghost {
-    border: 1px solid var(--s-line); color: var(--s-ink); background: rgba(244, 239, 231, 0.02);
+    border: 1px solid var(--s-line); color: var(--s-ink);
+    background: color-mix(in srgb, var(--s-ink) 3%, transparent);
   }
   .st-btn-ghost:hover { border-color: color-mix(in srgb, var(--brand) 60%, transparent); color: var(--brand); }
   .st-btn-shine::after {
@@ -84,28 +115,28 @@
   .st-btn-shine:hover::after { transition: transform 0.7s ease; transform: translateX(130%); }
 
   /* --- hero -------------------------------------------------------------- */
-  .st-hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; position: relative; }
+  .st-hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; position: relative; padding-top: var(--demo-offset, 0); }
   .st-aurora { position: absolute; inset: 0; overflow: hidden; }
-  .st-aurora span { position: absolute; border-radius: 9999px; filter: blur(90px); opacity: 0.5; will-change: transform; }
+  .st-aurora span { position: absolute; border-radius: 9999px; filter: blur(90px); opacity: 0.75; will-change: transform; }
   .st-aurora span:nth-child(1) {
     width: 44rem; height: 44rem; left: -12rem; top: -14rem;
-    background: radial-gradient(circle, color-mix(in srgb, var(--brand) 34%, transparent), transparent 65%);
+    background: radial-gradient(circle, var(--s-aurora1), transparent 65%);
     animation: st-float-a 16s ease-in-out infinite alternate;
   }
   .st-aurora span:nth-child(2) {
     width: 36rem; height: 36rem; right: -10rem; top: 20%;
-    background: radial-gradient(circle, rgba(151, 71, 255, 0.16), transparent 65%);
+    background: radial-gradient(circle, var(--s-aurora2), transparent 65%);
     animation: st-float-b 20s ease-in-out infinite alternate;
   }
   .st-aurora span:nth-child(3) {
     width: 30rem; height: 30rem; left: 30%; bottom: -12rem;
-    background: radial-gradient(circle, rgba(255, 96, 92, 0.12), transparent 65%);
+    background: radial-gradient(circle, var(--s-aurora3), transparent 65%);
     animation: st-float-a 24s ease-in-out infinite alternate-reverse;
   }
   @keyframes st-float-a { to { transform: translate(6rem, 3rem) scale(1.12); } }
   @keyframes st-float-b { to { transform: translate(-5rem, -4rem) scale(0.92); } }
 
-  .st-h1 { font-size: clamp(2.6rem, 8.5vw, 5.5rem); line-height: 1.04; font-weight: 400; }
+  .st-h1 { font-size: clamp(2.6rem, 8.5vw, 5.5rem); line-height: 1.04; }
   .st-h1 em { font-style: italic; color: var(--brand); }
   .st-line { display: block; overflow: hidden; }
   .st-line > span { display: block; transform: translateY(112%); animation: st-rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
@@ -137,47 +168,47 @@
 
   /* --- sekcije ------------------------------------------------------------ */
   .st-section { padding-block: 6rem; }
-  .st-h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 400; line-height: 1.1; }
+  .st-h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); line-height: 1.1; }
+  .st-h2 em { color: var(--brand); }
 
   /* cenovnik */
   .st-price-row { display: flex; align-items: baseline; gap: 0.9rem; padding: 1.15rem 0.25rem; border-bottom: 1px solid var(--s-line); transition: padding-left 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s; }
   .st-price-row:hover { padding-left: 1rem; border-color: color-mix(in srgb, var(--brand) 45%, transparent); }
   .st-price-name { font-size: 17px; }
   .st-price-min { font-size: 12px; color: var(--s-muted); }
-  .st-price-dots { flex: 1; border-bottom: 1px dotted rgba(244, 239, 231, 0.18); transform: translateY(-5px); }
+  .st-price-dots { flex: 1; border-bottom: 1px dotted color-mix(in srgb, var(--s-ink) 22%, transparent); transform: translateY(-5px); }
   .st-price-val { font-size: 16px; font-variant-numeric: tabular-nums; transition: color 0.3s; }
   .st-price-row:hover .st-price-val { color: var(--brand); }
 
   /* galerija */
   .st-tiles { display: grid; gap: 0.9rem; grid-template-columns: repeat(2, 1fr); }
   @media (min-width: 768px) { .st-tiles { grid-template-columns: repeat(3, 1fr); } }
-  .st-tile { position: relative; overflow: hidden; border-radius: 1.1rem; aspect-ratio: 4 / 5; border: 1px solid var(--s-line); }
+  .st-tile { position: relative; overflow: hidden; border-radius: var(--s-radius); aspect-ratio: 4 / 5; border: 1px solid var(--s-line); }
   .st-tile-art { position: absolute; inset: -12%; transition: transform 1.3s cubic-bezier(0.22, 1, 0.36, 1); }
   .st-tile:hover .st-tile-art { transform: scale(1.09) rotate(1.2deg); }
   .st-tile-label {
-    position: absolute; left: 0.9rem; bottom: 0.8rem; font-size: 12px; letter-spacing: 0.18em;
+    position: absolute; left: 0.9rem; bottom: 0.8rem; z-index: 1; font-size: 12px; letter-spacing: 0.18em;
     text-transform: uppercase; color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
   }
   .st-tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.42)); }
-  .st-tile-label { z-index: 1; }
 
   /* tim */
   .st-team { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
   .st-member {
-    border: 1px solid var(--s-line); border-radius: 1.1rem; padding: 1.6rem 1.4rem; background: var(--s-surface);
+    border: 1px solid var(--s-line); border-radius: var(--s-radius); padding: 1.6rem 1.4rem; background: var(--s-surface);
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s, box-shadow 0.4s;
   }
-  .st-member:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--brand) 45%, transparent); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.7); }
+  .st-member:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--brand) 45%, transparent); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.45); }
   .st-avatar {
     display: flex; height: 3.4rem; width: 3.4rem; align-items: center; justify-content: center;
     border-radius: 9999px; font-size: 17px; font-weight: 600; color: #14110d;
   }
 
   /* radno vreme */
-  .st-hours { border: 1px solid var(--s-line); border-radius: 1.1rem; overflow: hidden; }
+  .st-hours { border: 1px solid var(--s-line); border-radius: var(--s-radius); overflow: hidden; background: var(--s-surface); }
   .st-hours-row { display: flex; justify-content: space-between; align-items: center; padding: 0.95rem 1.3rem; border-bottom: 1px solid var(--s-line); font-size: 15px; }
   .st-hours-row:last-child { border-bottom: 0; }
-  .st-hours-row.today { background: color-mix(in srgb, var(--brand) 9%, transparent); }
+  .st-hours-row.today { background: color-mix(in srgb, var(--brand) 10%, transparent); }
   .st-hours-row.today .st-hours-day { color: var(--brand); font-weight: 600; }
   .st-dot { position: relative; display: inline-block; height: 0.5rem; width: 0.5rem; border-radius: 9999px; background: var(--brand); margin-right: 0.55rem; }
   .st-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: var(--brand); animation: st-ping 1.9s cubic-bezier(0, 0, 0.2, 1) infinite; }
@@ -208,6 +239,18 @@
 
 {% block content %}
 <div class="site st-grain">
+
+  {% if demo %}
+  <!-- Traka za biranje teme — postoji samo na /sajt-demo -->
+  <div class="st-demo-bar">
+    <span style="flex:none;opacity:.6">Tema:</span>
+    {% for t in themeList %}
+    <a class="st-demo-chip {% if t.key == theme.key %}active{% endif %}" href="/sajt-demo?tema={{ t.key }}">
+      <span class="st-demo-dot" style="background:{{ t.brand }}"></span>{{ t.label }}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- Navigacija -->
   <nav class="st-nav" id="stNav">
@@ -265,7 +308,7 @@
     <div class="st-wrap" style="display:grid;gap:3rem;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));align-items:center">
       <div class="rev">
         <p class="st-kicker">O nama</p>
-        <h2 class="st-serif st-h2" style="margin-top:1rem">Zanat star koliko i lepota.<br /><em style="color:var(--brand)">Pristup — nov.</em></h2>
+        <h2 class="st-serif st-h2" style="margin-top:1rem">Zanat star koliko i lepota.<br /><em>Pristup — nov.</em></h2>
         <p style="margin-top:1.4rem;color:var(--s-muted);font-size:16px;line-height:1.7">{{ site.aboutLong }}</p>
         <div style="margin-top:2rem;display:flex;gap:2.6rem">
           {% for f in site.facts %}
@@ -277,10 +320,12 @@
         </div>
       </div>
       <div class="rev st-tile" style="--d:.15s;aspect-ratio:4/5;max-width:26rem;justify-self:center">
+        <!-- "Foto" pločica od brand boje teme — tamna baza (#101010 je hrom slike,
+             kao overlay na .st-tile) drži beli label čitljivim na svakoj temi. -->
         <div class="st-tile-art" style="background:
           radial-gradient(60% 50% at 30% 25%, color-mix(in srgb, var(--brand) 55%, transparent), transparent 70%),
-          radial-gradient(50% 60% at 75% 70%, rgba(151,71,255,.35), transparent 70%),
-          linear-gradient(160deg, #241d15, #0e0c09)"></div>
+          radial-gradient(50% 60% at 75% 70%, var(--s-aurora2), transparent 70%),
+          linear-gradient(160deg, color-mix(in srgb, var(--brand) 50%, #101010), color-mix(in srgb, var(--brand) 14%, #101010))"></div>
         <span class="st-tile-label">{{ site.name }} · {{ site.city }}</span>
       </div>
     </div>
